@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 
 const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
