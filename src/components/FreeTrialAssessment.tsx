@@ -52,7 +52,7 @@ const FreeTrialAssessment = () => {
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
-  const handleResponseChange = (value) => {
+  const handleResponseChange = (value: number) => {
     setResponses(prev => ({
       ...prev,
       [currentQuestion.id]: value
@@ -76,11 +76,12 @@ const FreeTrialAssessment = () => {
   // 新しい分析ロジック（感情共感＋解決希望型）
   const analyzePreResult = () => {
     if (Object.keys(responses).length !== 5) return null;
-
-    const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
+// @ts-ignore
+    const totalScore = Object.values(responses as any).reduce((sum: number, val: number) => sum + val, 0);
+ // @ts-ignore   
     const averageScore = totalScore / 5;
 
-    const getPreResultType = (score) => {
+    const getPreResultType = (score: number) => {
       if (score <= 1) return {
         type: "「そのままで十分」と言われたいあなた",
         icon: "🌟",
@@ -347,7 +348,7 @@ const FreeTrialAssessment = () => {
                   key={value}
                   onClick={() => handleResponseChange(value)}
                   className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                    responses[currentQuestion.id] === value
+                    (responses as any)[currentQuestion.id] === value
                       ? `border-purple-500 bg-purple-500 text-white transform scale-105`
                       : 'border-gray-300 bg-white text-gray-700 hover:border-purple-300 hover:bg-purple-50'
                   }`}
@@ -394,7 +395,7 @@ const FreeTrialAssessment = () => {
 
             <button
               onClick={nextQuestion}
-              disabled={responses[currentQuestion.id] === undefined}
+              disabled={(responses as any)[currentQuestion.id] === undefined}
               className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
             >
               {currentStep === questions.length - 1 ? '結果を見る 🎯' : '次の質問 →'}
