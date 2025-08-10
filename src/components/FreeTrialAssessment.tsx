@@ -4,6 +4,29 @@ const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
+  // メール登録処理関数
+const handleEmailRegistration = () => {
+  // 診断データを準備
+  // @ts-ignore
+  const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
+  // @ts-ignore
+  const averageScore = (totalScore / 5).toFixed(1);
+  
+  // UTAGEフォームURL（後で設定）
+  const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/honmono"; // 仮URL
+  
+  // 診断データをURLパラメータとして準備
+  const params = new URLSearchParams({
+    diagnosis_type: preResult?.type || "",
+    diagnosis_score: averageScore,
+    // @ts-ignore
+    diagnosis_total: totalScore.toString(),
+    responses: JSON.stringify(responses)
+  });
+  
+  // UTAGEフォームにリダイレクト
+  window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
+};
 
   // 戦略的に選定された5問（軽い症状→深い核心への流れ）
   const questions = [
@@ -245,12 +268,9 @@ const FreeTrialAssessment = () => {
               </div>
               
               <div className="space-y-4">
-                <input
-                  type="email"
-                  placeholder="メールアドレスを入力して詳細分析を受け取る"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                />
-                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <button 
+                onClick={handleEmailRegistration}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
                   🔍 完全版15項目診断を今すぐ受け取る（無料）
                 </button>
               </div>
