@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [responses, setResponses] = useState({});
+  const [responses, setResponses] = useState<Record<number, number>>({});
   const [showPreResult, setShowPreResult] = useState(false);
   
   // 質問変更時に自動スクロール
@@ -25,10 +25,8 @@ const FreeTrialAssessment = () => {
   // メール登録処理関数
   const handleEmailRegistration = () => {
     // 診断データを準備
-    // @ts-ignore
-    const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
-    // @ts-ignore
-    const averageScore = (totalScore / 5).toFixed(1);
+    const totalScore: number = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
+    const averageScore: string = (totalScore / 5).toFixed(1);
     
     // UTAGEフォームURL
     const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/optin";
@@ -116,10 +114,8 @@ const FreeTrialAssessment = () => {
   // 【フリー版5問】の分析ロジック（感情共感＋解決希望型）
   const analyzePreResult = () => {
     if (Object.keys(responses).length !== 5) return null;
-    // @ts-ignore
-    const totalScore = Object.values(responses as any).reduce((sum: number, val: number) => sum + val, 0);
-    // @ts-ignore   
-    const averageScore = totalScore / 5;
+    const totalScore: number = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
+    const averageScore: number = totalScore / 5;
 
     const getPreResultType = (score: number) => {
       if (score <= 1) return {
@@ -388,7 +384,7 @@ const FreeTrialAssessment = () => {
                   key={value}
                   onClick={() => handleResponseChange(value)}
                   className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                    (responses as any)[currentQuestion.id] === value
+                    (responses as Record<number, number>)[currentQuestion.id] === value
                       ? `border-purple-500 bg-purple-500 text-white transform scale-105`
                       : 'border-gray-300 bg-white text-gray-700 hover:border-purple-300 hover:bg-purple-50'
                   }`}
@@ -435,7 +431,7 @@ const FreeTrialAssessment = () => {
 
             <button
               onClick={nextQuestion}
-              disabled={(responses as any)[currentQuestion.id] === undefined}
+              disabled={(responses as Record<number, number>)[currentQuestion.id] === undefined}
               className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
             >
               {currentStep === questions.length - 1 ? '結果を見る 🎯' : '次の質問 →'}
