@@ -33,13 +33,12 @@ const FreeTrialAssessment = () => {
     // UTAGEフォームURL
     const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/optin";
     
-    // 診断データをURLパラメータとして準備
+    // UTAGEカスタムフィールドに対応したパラメータ準備
     const params = new URLSearchParams({
-      diagnosis_type: preResult?.type || "",
-      diagnosis_score: averageScore,
-      // @ts-ignore
-      diagnosis_total: totalScore.toString(),
-      responses: JSON.stringify(responses)
+      free18: preResult?.type || "",           // diagnosis_type → free18
+      free19: averageScore,                    // diagnosis_score → free19
+      free20: totalScore.toString(),           // diagnosis_total → free20
+      free21: JSON.stringify(responses)        // responses → free21
     });
     
     // UTAGEフォームにリダイレクト
