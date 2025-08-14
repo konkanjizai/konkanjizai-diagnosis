@@ -1,74 +1,92 @@
-import  { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
+  
+  // 質問変更時に自動スクロール
+  useEffect(() => {
+    if (showPreResult) {
+      // 診断結果表示時は一番上にスクロール
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (currentStep > 0) {
+      // 質問進行中は質問カードにスクロール
+      const questionElement = document.getElementById('question-card');
+      if (questionElement) {
+        questionElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    }
+  }, [currentStep, showPreResult]);
+  
   // メール登録処理関数
-const handleEmailRegistration = () => {
-  // 診断データを準備
-  // @ts-ignore
-  const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
-  // @ts-ignore
-  const averageScore = (totalScore / 5).toFixed(1);
-  
-  // UTAGEフォームURL（後で設定）
-  const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/honmono"; // 仮URL
-  
-  // 診断データをURLパラメータとして準備
-  const params = new URLSearchParams({
-    diagnosis_type: preResult?.type || "",
-    diagnosis_score: averageScore,
+  const handleEmailRegistration = () => {
+    // 診断データを準備
     // @ts-ignore
-    diagnosis_total: totalScore.toString(),
-    responses: JSON.stringify(responses)
-  });
-  
-  // UTAGEフォームにリダイレクト
-  window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
-};
+    const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
+    // @ts-ignore
+    const averageScore = (totalScore / 5).toFixed(1);
+    
+    // UTAGEフォームURL
+    const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/optin";
+    
+    // 診断データをURLパラメータとして準備
+    const params = new URLSearchParams({
+      diagnosis_type: preResult?.type || "",
+      diagnosis_score: averageScore,
+      // @ts-ignore
+      diagnosis_total: totalScore.toString(),
+      responses: JSON.stringify(responses)
+    });
+    
+    // UTAGEフォームにリダイレクト
+    window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
+  };
 
-  // 戦略的に選定された5問（軽い症状→深い核心への流れ）
+  // 戦略的5問（【完全版】質問内容）
   const questions = [
     {
       id: 1,
-      category: "肉体",
+      category: "身体・エネルギー",
       categoryColor: "#10B981",
       categoryIcon: "💪",
-      text: "体が緊張していることが多く、リラックスできない",
-      explanation: "身体の緊張は心の状態を映す鏡です"
+      text: "どんなに休んでも、心の奥の疲れが取れない感覚がある",
+      explanation: "身体の疲労は心の状態を映す鏡です"
     },
     {
       id: 2,
-      category: "精神",
+      category: "感情・思考・役割",
       categoryColor: "#EC4899", 
       categoryIcon: "🧠",
-      text: "本音を言うことができない場面が多い",
-      explanation: "本音を封印することで偽物感が生まれます"
+      text: "周りから評価されている自分が、本当にその評価に値する人間なのか疑問に思うことがある",
+      explanation: "自分への根本的な疑問が偽物感の核心を表します"
     },
     {
       id: 3,
-      category: "精神",
-      categoryColor: "#EC4899",
-      categoryIcon: "🧠", 
-      text: "公的な自分と私的な自分の間に大きなギャップがある",
-      explanation: "内外の不一致は深い疲労感を生み出します"
+      category: "人生・存在・意味",
+      categoryColor: "#6366F1",
+      categoryIcon: "🧘‍♀️", 
+      text: "これだけ恵まれているのに『人生これでいいの？』と思ってしまう自分に罪悪感を感じる",
+      explanation: "成功への虚無感は心の奥からのサインです"
     },
     {
       id: 4,
-      category: "魂",
-      categoryColor: "#6366F1",
-      categoryIcon: "🧘‍♀️",
-      text: "成功しているはずなのに、深い充実感を感じられない",
-      explanation: "魂の声と現実のギャップが虚無感を生みます"
+      category: "感情・思考・役割",
+      categoryColor: "#EC4899",
+      categoryIcon: "🧠",
+      text: "誰にも理解してもらえない孤独感を、成功すればするほど強く感じる",
+      explanation: "成功者特有の孤独感は深い偽物感の表れです"
     },
     {
       id: 5,
-      category: "魂",
+      category: "人生・存在・意味",
       categoryColor: "#6366F1",
       categoryIcon: "🧘‍♀️", 
-      text: "「いつか正体がバレる」という恐怖を抱えている",
-      explanation: "これこそがインポスター症候群の核心です"
+      text: "心にポッカリ空いた穴を埋めるために、占いやスピリチュアルを求めてしまう",
+      explanation: "外側に答えを求める行動は内なる空虚感の現れです"
     }
   ];
 
@@ -96,12 +114,12 @@ const handleEmailRegistration = () => {
     }
   };
 
-  // 新しい分析ロジック（感情共感＋解決希望型）
+  // 【フリー版5問】の分析ロジック（感情共感＋解決希望型）
   const analyzePreResult = () => {
     if (Object.keys(responses).length !== 5) return null;
-// @ts-ignore
+    // @ts-ignore
     const totalScore = Object.values(responses as any).reduce((sum: number, val: number) => sum + val, 0);
- // @ts-ignore   
+    // @ts-ignore   
     const averageScore = totalScore / 5;
 
     const getPreResultType = (score: number) => {
@@ -168,9 +186,9 @@ const handleEmailRegistration = () => {
           <div className="bg-white rounded-3xl shadow-xl p-8">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                🎯 あなたの心の声が聞こえました
+                🎯 あなたの偽物感の正体が見えました
               </h1>
-              <p className="text-gray-600">5問の分析結果をお伝えします</p>
+              <p className="text-gray-600">深層心理分析の結果をお伝えします</p>
             </div>
 
             {/* 結果表示 */}
@@ -269,8 +287,8 @@ const handleEmailRegistration = () => {
               
               <div className="space-y-4">
                 <button 
-                onClick={handleEmailRegistration}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                  onClick={handleEmailRegistration}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
                   🔍 完全版15項目診断を今すぐ受け取る（無料）
                 </button>
               </div>
@@ -302,6 +320,8 @@ const handleEmailRegistration = () => {
                     setCurrentStep(0);
                     setResponses({});
                     setShowPreResult(false);
+                    // 診断開始位置にスクロール
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className="text-gray-400 text-sm hover:text-gray-600 transition-colors underline"
                 >
@@ -317,13 +337,14 @@ const handleEmailRegistration = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto py-4">
         <div className="bg-white rounded-3xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              あなたも『偽物の自分』を<br/>演じて疲れていませんか？
+              偽物感の正体診断<br/>
+              〜あなたの心にポッカリ空いた穴を科学的に解明〜
             </h1>
-            <p className="text-gray-600">5分でわかる本物度診断【フリー体験版】</p>
+            <p className="text-gray-600">なぜ成功しているのに満たされないのか？3分でわかる深層心理分析</p>
           </div>
 
           {/* プログレスバー */}
@@ -346,7 +367,7 @@ const handleEmailRegistration = () => {
           </div>
 
           {/* 質問カード */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-2xl mb-8">
+          <div id="question-card" className="bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-2xl mb-8">
             <div className="text-center mb-6">
               <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-4" style={{ 
                 backgroundColor: currentQuestion.categoryColor + '20',
