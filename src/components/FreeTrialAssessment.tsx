@@ -4,14 +4,11 @@ const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState<Record<number, number>>({});
   const [showPreResult, setShowPreResult] = useState(false);
-  
   // 質問変更時に自動スクロール
   useEffect(() => {
     if (showPreResult) {
-      // 診断結果表示時は一番上にスクロール
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (currentStep > 0) {
-      // 質問進行中は質問カードにスクロール
       const questionElement = document.getElementById('question-card');
       if (questionElement) {
         questionElement.scrollIntoView({ 
@@ -21,22 +18,22 @@ const FreeTrialAssessment = () => {
       }
     }
   }, [currentStep, showPreResult]);
-  
+
   // メール登録処理関数
   const handleEmailRegistration = () => {
     // 診断データを準備
-    const totalScore: number = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
-    const averageScore: string = (totalScore / 5).toFixed(1);
+    const totalScore = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
+    const averageScore = (totalScore / 5).toFixed(1);
     
     // UTAGEフォームURL
     const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/optin";
     
-    // UTAGEカスタムフィールドに対応したパラメータ準備
+    // 診断データをURLパラメータとして準備
     const params = new URLSearchParams({
-      free18: preResult?.type || "",           // diagnosis_type → free18
-      free19: averageScore,                    // diagnosis_score → free19
-      free20: totalScore.toString(),           // diagnosis_total → free20
-      free21: JSON.stringify(responses)        // responses → free21
+      diagnosis_type: preResult?.type || "",
+      diagnosis_score: averageScore,
+      diagnosis_total: totalScore.toString(),
+      responses: JSON.stringify(responses)
     });
     
     // UTAGEフォームにリダイレクト
@@ -114,8 +111,8 @@ const FreeTrialAssessment = () => {
   // 【フリー版5問】の分析ロジック（感情共感＋解決希望型）
   const analyzePreResult = () => {
     if (Object.keys(responses).length !== 5) return null;
-    const totalScore: number = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
-    const averageScore: number = totalScore / 5;
+    const totalScore = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
+    const averageScore = totalScore / 5;
 
     const getPreResultType = (score: number) => {
       if (score <= 1) return {
@@ -315,7 +312,6 @@ const FreeTrialAssessment = () => {
                     setCurrentStep(0);
                     setResponses({});
                     setShowPreResult(false);
-                    // 診断開始位置にスクロール
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className="text-gray-400 text-sm hover:text-gray-600 transition-colors underline"
@@ -384,7 +380,7 @@ const FreeTrialAssessment = () => {
                   key={value}
                   onClick={() => handleResponseChange(value)}
                   className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                    (responses as Record<number, number>)[currentQuestion.id] === value
+                    responses[currentQuestion.id] === value
                       ? `border-purple-500 bg-purple-500 text-white transform scale-105`
                       : 'border-gray-300 bg-white text-gray-700 hover:border-purple-300 hover:bg-purple-50'
                   }`}
@@ -431,7 +427,7 @@ const FreeTrialAssessment = () => {
 
             <button
               onClick={nextQuestion}
-              disabled={(responses as Record<number, number>)[currentQuestion.id] === undefined}
+              disabled={responses[currentQuestion.id] === undefined}
               className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
             >
               {currentStep === questions.length - 1 ? '結果を見る 🎯' : '次の質問 →'}
