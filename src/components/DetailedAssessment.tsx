@@ -36,7 +36,7 @@ const DetailedAssessment = () => {
     }
   }, [currentStep, showPreResult]);
   
-  // 修正：既存ユーザーデータ更新処理（詳細解説資料送信用）
+  // 🔧 修正版：隠しフォームでPOST送信
   const handleEmailRegistration = () => {
     // 診断データを準備
     const totalScore: number = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
@@ -47,8 +47,14 @@ const DetailedAssessment = () => {
     const emotionRoleScore = [6,7,8,9,10].reduce((sum, id) => sum + (responses[id] || 0), 0);
     const lifeMeaningScore = [11,12,13,14,15].reduce((sum, id) => sum + (responses[id] || 0), 0);
     
-    // UTAGEカスタムフィールド更新用パラメータ
-    const params = new URLSearchParams({
+    // ✅ 修正：隠しフォームを作成してPOST送信
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://online.konkanjizai.com/p/thanks-15';
+    form.style.display = 'none';
+    
+    // フォームフィールドを追加
+    const fields = {
       email: userEmail,                                 // ユーザー識別用
       name: userName,                                   // ユーザー名
       free22: preResult?.type || "",                    // 詳細診断タイプ
@@ -58,26 +64,23 @@ const DetailedAssessment = () => {
       free26: emotionRoleScore.toString(),              // 感情・思考・役割スコア
       free27: lifeMeaningScore.toString(),              // 人生・存在・意味スコア
       free28: JSON.stringify(responses)                 // 全回答データ
+    };
+    
+    // 各フィールドをフォームに追加
+    Object.entries(fields).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value;
+      form.appendChild(input);
     });
     
     // デバッグ用：送信データの確認
-    console.log('送信データ:', {
-      email: userEmail,
-      name: userName,
-      diagnosticData: {
-        type: preResult?.type,
-        averageScore,
-        totalScore,
-        bodyEnergyScore,
-        emotionRoleScore,
-        lifeMeaningScore,
-        responses
-      }
-    });
+    console.log('送信データ:', fields);
     
-    // UTAGE完了ページに遷移
-    const UTAGE_THANKS_URL = "https://online.konkanjizai.com/p/thanks-15";
-    window.location.href = `${UTAGE_THANKS_URL}?${params.toString()}`;
+    // フォームをDOMに追加して送信
+    document.body.appendChild(form);
+    form.submit();
   };
 
   // 15問の質問データ（3領域×5問）
