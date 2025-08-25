@@ -4,6 +4,7 @@ const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState<Record<number, number>>({});
   const [showPreResult, setShowPreResult] = useState(false);
+  
   // 質問変更時に自動スクロール
   useEffect(() => {
     if (showPreResult) {
@@ -19,7 +20,7 @@ const FreeTrialAssessment = () => {
     }
   }, [currentStep, showPreResult]);
 
-  // メール登録処理関数
+  // 🔧 修正版：UTAGEカスタムフィールドに直接対応
   const handleEmailRegistration = () => {
     // 診断データを準備
     const totalScore = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
@@ -28,12 +29,12 @@ const FreeTrialAssessment = () => {
     // UTAGEフォームURL
     const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/optin";
     
-    // 診断データをURLパラメータとして準備
+    // ✅ 修正：パラメータ名をUTAGEカスタムフィールド名に直接対応
     const params = new URLSearchParams({
-      diagnosis_type: preResult?.type || "",
-      diagnosis_score: averageScore,
-      diagnosis_total: totalScore.toString(),
-      responses: JSON.stringify(responses)
+      free18: preResult?.type || "",                    // diagnosis_type → free18
+      free19: averageScore,                            // diagnosis_score → free19  
+      free20: totalScore.toString(),                   // diagnosis_total → free20
+      free21: JSON.stringify(responses)                // responses → free21
     });
     
     // UTAGEフォームにリダイレクト
