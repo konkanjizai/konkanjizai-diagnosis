@@ -294,7 +294,20 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
       diagnosisType
     );
     
-    const params = new URLSearchParams({
+    console.log('📊 送信データ:', {
+      email: userEmail,
+      name: userName,
+      diagnosticData: diagnosisResults,
+      resultPageUrl: resultPageUrl
+    });
+    
+    // フォームを作成してPOST送信（UTAGEが正しく受け取れるように）
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://online.konkanjizai.com/p/optin15';
+    form.style.display = 'none';
+
+    const fields = {
       mail: userEmail || '',
       name: userName || '',
       free22: diagnosisResults.totalScore.toString(),
@@ -305,18 +318,20 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
       free27: diagnosisResults.lifeMeaningScore.toString(),
       free28: JSON.stringify(diagnosisResults.responses),
       free29: resultPageUrl || '' // 🆕 診断結果ページURL
+    };
+
+    // フィールドを追加
+    Object.entries(fields).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value;
+      form.appendChild(input);
     });
-    
-    console.log('📊 送信データ:', {
-      email: userEmail,
-      name: userName,
-      diagnosticData: diagnosisResults,
-      resultPageUrl: resultPageUrl
-    });
-    
-    // UTAGEオプトインページへ遷移
-    const UTAGE_OPTIN_URL = "https://online.konkanjizai.com/p/optin15";
-    window.location.href = `${UTAGE_OPTIN_URL}?${params.toString()}`;
+
+    // フォームをDOMに追加して送信
+    document.body.appendChild(form);
+    form.submit();
   };
 
   // 簡易結果分析
