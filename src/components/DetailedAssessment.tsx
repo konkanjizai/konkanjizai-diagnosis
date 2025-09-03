@@ -62,19 +62,6 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
   const [showPreResult, setShowPreResult] = useState(false);
   const [isSubmittingToUTAGE, setIsSubmittingToUTAGE] = useState(false);
 
-  // 診断結果の型定義
-  interface PreResult {
-    type: string;
-    icon: string;
-    color: string;
-    currentState: string;
-    curiosityGaps: string[];
-    deepDiagnosis: string;
-    finalCatch: string;
-  }
-
-  const [preResult, setPreResult] = useState<PreResult | null>(null);
-
   // URLパラメータから情報を取得（UTAGEから遷移してきた場合）
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -240,7 +227,6 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
       setCurrentStep(currentStep + 1);
     } else {
       setShowPreResult(true);
-      analyzePreResult();
     }
   };
 
@@ -271,11 +257,11 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
 
   // 診断タイプを取得する関数
   const getDiagnosisType = (totalScore: number): string => {
-    if (totalScore <= 15) return "微かな違和感を心の羅針盤にする探求者";
-    if (totalScore <= 30) return "仮面と素顔の間で真実を探す探求者";
-    if (totalScore <= 45) return "偽物感と本物感の狭間を生きる探求者";
-    if (totalScore <= 60) return "偽物の鎧を脱ぎ捨てる勇気を育む探求者";
-    return "本物の自分との再会を前に立つ探求者";
+    if (totalScore <= 15) return "偽物感 ごく軽度";
+    if (totalScore <= 30) return "偽物感 軽度";
+    if (totalScore <= 45) return "偽物感 中度";
+    if (totalScore <= 60) return "偽物感 重度";
+    return "偽物感 極度";
   };
 
   // 診断完了時の処理（オプトインページへ遷移）
@@ -286,7 +272,7 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
     const diagnosisResults = calculateDiagnosisResults();
     const diagnosisType = getDiagnosisType(diagnosisResults.totalScore);
     
-    // 🆕 診断結果ページを保存してURLを取得
+    // 診断結果ページを保存してURLを取得
     const resultPageUrl = await saveResultAndGetUrl(
       userName || '',
       Object.values(responses),
@@ -305,7 +291,7 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
       free26: diagnosisResults.emotionRoleScore.toString(),
       free27: diagnosisResults.lifeMeaningScore.toString(),
       free28: JSON.stringify(diagnosisResults.responses),
-      free29: resultPageUrl || '' // 🆕 診断結果ページURL
+      free29: resultPageUrl || ''
     });
     
     console.log('📊 送信データ:', {
@@ -320,93 +306,11 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
     window.location.href = `${UTAGE_OPTIN_URL}?${params.toString()}`;
   };
 
-  // 簡易結果分析
-  const analyzePreResult = () => {
-    const results = calculateDiagnosisResults();
-    const averageScore = results.averageScore;
-
-    let resultData: PreResult;
-
-    if (averageScore <= 1.5) {
-      resultData = {
-        type: "深い安定感をお持ちの探求者",
-        icon: "🌟",
-        color: "#10B981",
-        currentState: "あなたは心身のバランスが比較的良く保たれており、日常的な大きなストレスは少ない状態です。ただし、時折感じる「もっと深い何かがあるのでは？」という探求心は、実は重要なサインかもしれません。",
-        curiosityGaps: [
-          "なぜ安定しているのに「もっと」を求めてしまうのか？",
-          "この探求心の正体は何なのか？",
-          "次のステージへの具体的な道筋とは？"
-        ],
-        deepDiagnosis: "実は、あなたの『深い安定感』の裏には、まだ探求されていない可能性が眠っているのです。",
-        finalCatch: "次のステージへ進む準備ができています"
-      };
-    } else if (averageScore <= 2.5) {
-      resultData = {
-        type: "微細な違和感を感じ始めた気づきの人",
-        icon: "🌸",
-        color: "#3B82F6",
-        currentState: "日常生活は順調でも、心の奥で「何かが少し違う」という微細な違和感を感じることが増えているのではないでしょうか。この早期の気づきは、実は貴重なサインです。",
-        curiosityGaps: [
-          "この微妙な違和感の正体は何なのか？",
-          "なぜ成功しているのにしっくりこないのか？",
-          "この状態を根本から改善する方法とは？"
-        ],
-        deepDiagnosis: "この『微細な違和感』こそ、あなたが本物の自分へと向かう最初の扉なのです。",
-        finalCatch: "変化の兆しが現れています"
-      };
-    } else if (averageScore <= 3.5) {
-      resultData = {
-        type: "本音と建前のギャップに悩む真面目な努力家",
-        icon: "💭",
-        color: "#F59E0B",
-        currentState: "「本当の自分」と「期待される自分」の間で明確なギャップを感じ、時として深い疲れを覚えることがあるのではないでしょうか。この状態は、実は多くの成功者が経験する一般的な現象です。",
-        curiosityGaps: [
-          "なぜ偽物感を感じてしまうのか？",
-          "この状態から確実に抜け出す方法とは？",
-          "自然体で愛される具体的なステップとは？"
-        ],
-        deepDiagnosis: "仮面を外す勇気を持つことで、真の自分との出会いが待っています。",
-        finalCatch: "転換点に立っています"
-      };
-    } else if (averageScore <= 4.5) {
-      resultData = {
-        type: "深い疲労感と孤独感を抱える頑張り屋さん",
-        icon: "🎭",
-        color: "#EF4444",
-        currentState: "毎日が舞台のように感じられ、「いつまでこの演技を続けなければならないのか」という深い疲労感を抱えていらっしゃるのではないでしょうか。この深刻な状態には、科学的な原因と解決方法があります。",
-        curiosityGaps: [
-          "なぜこれほど深い疲労感を感じるのか？",
-          "この状態から完全に回復する方法とは？",
-          "同じ状態から回復した人の具体的事例とは？"
-        ],
-        deepDiagnosis: "もう一人で頑張る必要はありません。サポートを受けることで、必ず道は開けます。",
-        finalCatch: "解放への道が見えています"
-      };
-    } else {
-      resultData = {
-        type: "存在の意味を問い続ける深い探求者",
-        icon: "🌑",
-        color: "#991B1B",
-        currentState: "「この人生に本当に意味があるのか」という根本的な問いに日々向き合い、存在そのものへの深い疑問を抱えていらっしゃるのではないでしょうか。この状態は、実は魂からの重要なメッセージかもしれません。",
-        curiosityGaps: [
-          "なぜこれほど深い虚無感を感じるのか？",
-          "この苦しみの真の意味とは？",
-          "存在の喜びを取り戻す具体的な方法とは？"
-        ],
-        deepDiagnosis: "この深い問いかけこそ、魂の目覚めへの呼び声なのです。",
-        finalCatch: "新しい人生の扉が開きかけています"
-      };
-    }
-
-    setPreResult(resultData);
-  };
-
   // デバッグ用：取得したパラメータの表示（開発時のみ）
   const showDebugInfo = userEmail || userName;
 
-  // 簡易結果画面（5問診断と同じダークテーマUI）
-  if (showPreResult && preResult) {
+  // 診断完了画面（新規作成）
+  if (showPreResult) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
         <div className="max-w-3xl mx-auto">
@@ -423,116 +327,104 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
               </div>
             )}
 
+            {/* ヘッダー */}
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-4">
-                🎯 あなたの状態が見えてきました
+                診断が完了しました
               </h1>
-              <p className="text-white/80">15問診断の簡易結果をお伝えします</p>
-            </div>
-
-            {/* 結果表示 */}
-            <div className="text-center mb-8">
-              <div className="mb-6">
-                <div className="text-6xl mb-4">{preResult.icon}</div>
-                <h2 className="text-2xl font-bold mb-4 leading-relaxed text-white">
-                  {preResult.type}
-                </h2>
-              </div>
-            </div>
-
-            {/* 簡易分析結果 */}
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl mb-6 border border-white/20">
-              <h3 className="text-lg font-bold text-white mb-3">
-                💭 簡易分析結果
-              </h3>
-              <p className="text-white/90 leading-relaxed">
-                {preResult.currentState}
+              <p className="text-white/80 text-lg">
+                15問の回答から、あなただけの特別な診断レポートを作成しました
               </p>
             </div>
 
-            {/* 未解明ポイント */}
-            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm p-6 rounded-2xl mb-8 border border-yellow-400/30">
-              <h3 className="text-lg font-bold text-white mb-3">
-                ❓ ただし、まだ解明されていない重要なポイントがあります
-              </h3>
-              <div className="space-y-2">
-                {preResult.curiosityGaps.map((gap, index) => (
-                  <div key={index} className="flex items-start">
-                    <span className="text-yellow-400 mr-2">•</span>
-                    <span className="text-white/90">{gap}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 詳細解説への誘導 */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-8 rounded-2xl text-white mb-8">
-              <h2 className="text-2xl font-bold mb-4">
-                📊 詳細な個別分析レポート（全15ページ）
+            {/* 診断レポート概要 */}
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl mb-8 border border-white/20">
+              <h2 className="text-2xl font-bold text-white mb-6 text-center">
+                📊 あなただけの偽物感診断レポート
               </h2>
-              <p className="mb-6 text-lg">
-                実は、あなたの回答には、<strong className="text-yellow-300">あなた自身も気づいていない重要なサイン</strong>が隠れています。
-              </p>
               
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl mb-6">
-                <h3 className="font-bold mb-3">📑 お送りする内容：</h3>
-                <ul className="space-y-2 text-sm">
-                  <li>✅ 3つの領域別の詳細分析（各5ページ）</li>
-                  <li>✅ あなたの「偽物感」の真の原因と仕組み</li>
-                  <li>✅ 今すぐできる具体的な改善方法</li>
-                  <li>✅ 同じ悩みから解放された方の事例</li>
-                  <li>✅ 30日間で変化を起こすロードマップ</li>
-                </ul>
+              <div className="space-y-6">
+                {/* レポート内容紹介 */}
+                <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-5 rounded-xl">
+                  <h3 className="font-bold text-white mb-3 flex items-center">
+                    <span className="text-2xl mr-2">📈</span>
+                    <span>詳細な数値分析</span>
+                  </h3>
+                  <ul className="text-white/90 space-y-2 ml-8">
+                    <li>• 偽物感の強さを5段階で判定</li>
+                    <li>• 3つの領域（身体・感情・人生）別スコア</li>
+                    <li>• あなたのバランス分析チャート</li>
+                  </ul>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 p-5 rounded-xl">
+                  <h3 className="font-bold text-white mb-3 flex items-center">
+                    <span className="text-2xl mr-2">🔍</span>
+                    <span>偽物感の正体解明</span>
+                  </h3>
+                  <ul className="text-white/90 space-y-2 ml-8">
+                    <li>• 実はあなたの偽物感には世界的に認められた正式名称があります</li>
+                    <li>• 成功者の70%以上が経験する「インポスター症候群」について</li>
+                    <li>• なぜ優秀な人ほど強く感じるのか、その科学的根拠</li>
+                  </ul>
+                </div>
+
+                <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 p-5 rounded-xl">
+                  <h3 className="font-bold text-white mb-3 flex items-center">
+                    <span className="text-2xl mr-2">💡</span>
+                    <span>個別化された分析</span>
+                  </h3>
+                  <ul className="text-white/90 space-y-2 ml-8">
+                    <li>• あなたの回答パターンから見える心の状態</li>
+                    <li>• 最も影響を受けている領域の特定</li>
+                    <li>• 同じ症候群を持つ著名人の例（夏目漱石、マヤ・アンジェロウなど）</li>
+                  </ul>
+                </div>
+
+                <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 p-5 rounded-xl">
+                  <h3 className="font-bold text-white mb-3 flex items-center">
+                    <span className="text-2xl mr-2">🌟</span>
+                    <span>希望のメッセージ</span>
+                  </h3>
+                  <ul className="text-white/90 space-y-2 ml-8">
+                    <li>• あなたの偽物感は「欠陥」ではなく「優秀さの証明」である理由</li>
+                    <li>• なぜこの症候群が起こるのか、その心理的メカニズム</li>
+                    <li>• 解放への第一歩となる重要な気づき</li>
+                  </ul>
+                </div>
               </div>
-              
-              <p className="text-sm opacity-90">
-                通常30,000円相当の個別分析を<strong className="text-yellow-300">今だけ完全無料</strong>でお届けします
-              </p>
             </div>
 
-            {/* メール登録フォーム */}
+            {/* 価値提示 */}
+            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm p-6 rounded-2xl mb-8 border border-yellow-400/30">
+              <div className="text-center">
+                <div className="text-3xl mb-3">🎁</div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  通常30,000円相当の個別分析レポート
+                </h3>
+                <p className="text-white/90">
+                  今なら<strong className="text-yellow-300">完全無料</strong>でお届けします
+                </p>
+                <p className="text-sm text-white/70 mt-2">
+                  ※ この診断レポートは30日間いつでも閲覧可能です
+                </p>
+              </div>
+            </div>
+
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-center mb-6 text-white">
-                📧 詳細解説を無料で受け取る
-              </h3>
-              
               <button
                 onClick={handleDiagnosisComplete}
                 disabled={isSubmittingToUTAGE}
-                className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold text-lg rounded-full hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold text-lg rounded-full hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
-                {isSubmittingToUTAGE ? '処理中...' : '無料で詳細解説を受け取る →'}
+                {isSubmittingToUTAGE ? '処理中...' : '診断レポートを読む →'}
               </button>
-              
-              <p className="text-xs text-white/60 text-center mt-3">
-                ※ 迷惑メールは一切送りません。いつでも配信停止可能です。
-              </p>
             </div>
 
-            {/* 安心要素 */}
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl mb-6 border border-white/20">
-              <h4 className="font-bold text-white mb-3">🔒 安心してご登録ください</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-white/80">
-                <div>
-                  <div className="text-lg mb-1">🔐</div>
-                  <div>SSL暗号化通信</div>
-                </div>
-                <div>
-                  <div className="text-lg mb-1">📧</div>
-                  <div>配信停止いつでも可能</div>
-                </div>
-                <div>
-                  <div className="text-lg mb-1">🎯</div>
-                  <div>押し売り一切なし</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 緊急性演出 */}
-            <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm p-4 rounded-xl border border-orange-400/30 mb-6">
-              <p className="text-center text-sm text-white">
-                <strong>⏰ このレベルの詳細分析を無料で受けられるのは、システムの都合上今月末までとなります。</strong><br/>
-                次回の無料提供時期は未定です。
+            {/* シンプルな注記 */}
+            <div className="text-center mt-6">
+              <p className="text-white/60 text-sm">
+                診断レポートは30日間いつでも読み返せます
               </p>
             </div>
 
@@ -540,7 +432,7 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
             <div className="text-center">
               <div className="border-t border-white/20 pt-4">
                 <p className="text-xs text-white/50 mb-2">
-                  「もう一度最初から診断したい」という方は...
+                  診断をやり直したい場合は...
                 </p>
                 <button 
                   onClick={() => {
@@ -551,9 +443,16 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
                   }}
                   className="text-white/60 text-sm hover:text-white/80 transition-colors underline"
                 >
-                  🔄 診断をやり直す
+                  🔄 最初から診断をやり直す
                 </button>
               </div>
+            </div>
+
+            {/* フッター */}
+            <div className="mt-8 pt-6 border-t border-white/20">
+              <p className="text-center text-white/60 text-sm">
+                © 2025 魂感自在 All rights reserved.
+              </p>
             </div>
           </div>
         </div>
@@ -561,7 +460,7 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
     );
   }
 
-  // 診断質問画面（5問診断と同じダークテーマUI）
+  // 診断質問画面（既存のまま）
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
       <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-3xl p-8">
@@ -670,6 +569,13 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
           <p className="text-sm text-white/80">
             💡 この後、3つの領域からあなたの心を分析し<br/>
             <strong className="text-yellow-400">個別診断レポート</strong>を無料でお送りします
+          </p>
+        </div>
+
+        {/* フッター */}
+        <div className="mt-8 pt-6 border-t border-white/20">
+          <p className="text-center text-white/60 text-xs">
+            © 2025 魂感自在 All rights reserved.
           </p>
         </div>
       </div>
