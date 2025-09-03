@@ -164,25 +164,35 @@ function getImpostorDescription(totalScore) {
 
 // 診断結果HTMLテンプレート
 function getResultTemplate(data) {
+  // データの取り出し（lifeScoreとmeaningScoreの両方に対応）
   const {
-    userName = 'あなた',
+    userName = '',
+    sei = '',
+    mei = '',
     totalScore = 0,
     bodyScore = 0,
     emotionScore = 0,
-    lifeScore = 0
+    meaningScore = 0,  // 正しい名前
+    lifeScore = 0      // 互換性のため残す
   } = data;
+
+  // 名前の処理（姓名を結合）
+  const displayName = userName || `${sei} ${mei}`.trim() || 'あなた';
+  
+  // meaningScoreが0の場合はlifeScoreを使う（互換性のため）
+  const finalLifeScore = meaningScore || lifeScore || 0;
 
   // パーセンテージ計算
   const bodyPercent = Math.round((bodyScore / 25) * 100);
   const emotionPercent = Math.round((emotionScore / 25) * 100);
-  const lifePercent = Math.round((lifeScore / 25) * 100);
+  const lifePercent = Math.round((finalLifeScore / 25) * 100);
 
   // 診断タイプとメッセージを取得
   const diagnosisLevel = getDiagnosisType(totalScore);
   const scoreDescription = getScoreDescription(totalScore);
   const bodyAnalysis = getBodyAnalysis(bodyScore);
   const emotionAnalysis = getEmotionAnalysis(emotionScore);
-  const lifeAnalysis = getLifeAnalysis(lifeScore);
+  const lifeAnalysis = getLifeAnalysis(finalLifeScore);
   const impostorSection = getImpostorDescription(totalScore);
 
   // 現在の日付を取得
@@ -476,7 +486,7 @@ function getResultTemplate(data) {
     <div class="container">
         <div class="header">
             <div class="diagnosis-badge">偽物感診断 分析レポート</div>
-            <h1 class="user-name">${userName}様</h1>
+            <h1 class="user-name">${displayName}様</h1>
             <p class="diagnosis-date">診断日: ${dateStr}</p>
         </div>
 
@@ -532,7 +542,7 @@ function getResultTemplate(data) {
                     <span>✨</span>
                     <span>人生・存在・意味領域</span>
                 </h3>
-                <div class="analysis-score">スコア: ${lifeScore}/25点</div>
+                <div class="analysis-score">スコア: ${finalLifeScore}/25点</div>
                 <div class="score-bar">
                     <div class="score-fill" style="width: ${lifePercent}%;"></div>
                 </div>
@@ -558,7 +568,7 @@ function getResultTemplate(data) {
             ${impostorSection}
 
             <div class="footer">
-                <p>&copy; 2025 魂感自在道 - Konkan Jizai Do</p>
+                <p>&copy; 2025 魂感自在 All rights reserved.</p>
                 <p>この診断結果は30日間保存されます</p>
             </div>
         </div>
