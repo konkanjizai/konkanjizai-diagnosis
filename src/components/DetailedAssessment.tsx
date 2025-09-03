@@ -5,9 +5,10 @@ const generateUniqueId = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 };
 
-// 診断結果を保存してURLを返す関数
+// 診断結果を保存してURLを返す関数（修正版：姓と名を個別に受け取る）
 const saveResultAndGetUrl = async (
-  userName: string,
+  sei: string,      // 姓を個別に
+  mei: string,      // 名を個別に
   responses: number[],
   totalScore: number,
   diagnosisType: string
@@ -20,7 +21,9 @@ const saveResultAndGetUrl = async (
   const meaningScore = responses.slice(10, 15).reduce((a, b) => a + b, 0);
   
   const resultData = {
-    userName,
+    sei,                          // 姓を保存
+    mei,                          // 名を保存
+    userName: `${sei} ${mei}`.trim(),  // 結合した名前も保持（互換性のため）
     totalScore,
     diagnosisType,
     bodyScore,
@@ -272,9 +275,15 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
     const diagnosisResults = calculateDiagnosisResults();
     const diagnosisType = getDiagnosisType(diagnosisResults.totalScore);
     
-    // 診断結果ページを保存してURLを取得
+    // 名前を姓と名に分割（スペースで分割、なければ全体を姓とする）
+    const nameParts = (userName || '').trim().split(/[\s　]+/);  // 半角・全角スペースで分割
+    const sei = nameParts[0] || '';
+    const mei = nameParts.slice(1).join(' ') || '';  // 2つ目以降を名とする
+    
+    // 診断結果ページを保存してURLを取得（姓と名を個別に渡す）
     const resultPageUrl = await saveResultAndGetUrl(
-      userName || '',
+      sei,      // 姓
+      mei,      // 名
       Object.values(responses),
       diagnosisResults.totalScore,
       diagnosisType
@@ -283,7 +292,9 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
     // URLパラメータを作成（GETパラメータとして送信）
     const params = new URLSearchParams({
       mail: userEmail || '',
-      name: userName || '',
+      sei: sei,           // 姓を追加
+      mei: mei,           // 名を追加
+      name: userName || '',  // 互換性のため元の名前も残す
       free22: diagnosisResults.totalScore.toString(),
       free23: diagnosisType,
       free24: diagnosisResults.averageScore.toFixed(2),
@@ -296,7 +307,9 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
     
     console.log('📊 送信データ:', {
       email: userEmail,
-      name: userName,
+      sei: sei,
+      mei: mei,
+      fullName: userName,
       diagnosticData: diagnosisResults,
       resultPageUrl: resultPageUrl
     });
