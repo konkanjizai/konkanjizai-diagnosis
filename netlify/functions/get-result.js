@@ -32,84 +32,22 @@ exports.handler = async (event, context) => {
     if (!resultData) {
       return {
         statusCode: 404,
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-        },
-        body: `
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>診断結果が見つかりません</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 500px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    }
-    h1 {
-      color: #333;
-      margin-bottom: 20px;
-    }
-    p {
-      color: #666;
-      line-height: 1.6;
-    }
-    a {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      text-decoration: none;
-      border-radius: 30px;
-      transition: transform 0.3s;
-    }
-    a:hover {
-      transform: translateY(-2px);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>診断結果が見つかりません</h1>
-    <p>申し訳ございません。指定された診断結果が見つかりませんでした。</p>
-    <p>診断結果は30日間保存されます。期限が過ぎている可能性があります。</p>
-    <a href="https://eloquent-fairy-7272c1.netlify.app/?type=detailed">もう一度診断する</a>
-  </div>
-</body>
-</html>
-        `,
+        body: JSON.stringify({ error: 'Result not found' }),
       };
     }
 
-    // 診断結果ページを生成
-    const html = generateResultPage(resultData);
-    
+    // HTMLテンプレートを生成
+    const html = getResultTemplate(resultData);
+
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600',
       },
       body: html,
     };
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error fetching result:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal server error' }),
@@ -117,351 +55,604 @@ exports.handler = async (event, context) => {
   }
 };
 
-// 診断結果ページを生成する関数
-function generateResultPage(data) {
-  const { userName, totalScore, diagnosisType, bodyScore, emotionScore, meaningScore, responses, timestamp } = data;
-  
-  // パーセンテージ計算
-  const totalPercent = Math.round((totalScore / 75) * 100);
-  const bodyPercent = Math.round((bodyScore / 25) * 100);
-  const emotionPercent = Math.round((emotionScore / 25) * 100);
-  const meaningPercent = Math.round((meaningScore / 25) * 100);
-  
-  // 診断日のフォーマット
-  const diagnosisDate = new Date(timestamp).toLocaleDateString('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-  
-  return `
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow, noarchive">
-  <title>${userName || 'あなた'}様の診断結果 - 魂感自在道</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-    
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      overflow: hidden;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 40px;
-      text-align: center;
-    }
-    
-    .header h1 {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-    
-    .header .date {
-      opacity: 0.9;
-      font-size: 0.9rem;
-    }
-    
-    .content {
-      padding: 40px;
-    }
-    
-    .diagnosis-type {
-      text-align: center;
-      margin-bottom: 40px;
-      padding: 30px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      border-radius: 15px;
-    }
-    
-    .diagnosis-type h2 {
-      color: #764ba2;
-      font-size: 1.8rem;
-      margin-bottom: 15px;
-    }
-    
-    .total-score {
-      font-size: 3rem;
-      font-weight: bold;
-      color: #667eea;
-      margin-bottom: 10px;
-    }
-    
-    .total-score span {
-      font-size: 1.5rem;
-      color: #999;
-    }
-    
-    .score-bar {
-      width: 100%;
-      height: 30px;
-      background: #e0e0e0;
-      border-radius: 15px;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    
-    .score-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      transition: width 1s ease;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 10px;
-      color: white;
-      font-weight: bold;
-    }
-    
-    .area-scores {
-      margin: 40px 0;
-    }
-    
-    .area-scores h3 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-    
-    .score-item {
-      margin-bottom: 20px;
-    }
-    
-    .score-item-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    
-    .score-item-title {
-      font-weight: 600;
-      color: #555;
-    }
-    
-    .score-item-value {
-      color: #667eea;
-      font-weight: bold;
-    }
-    
-    .message-section {
-      margin: 40px 0;
-      padding: 30px;
-      background: #f8f9fa;
-      border-radius: 15px;
-      border-left: 4px solid #764ba2;
-    }
-    
-    .message-section h3 {
-      color: #764ba2;
-      margin-bottom: 15px;
-    }
-    
-    .message-section p {
-      line-height: 1.8;
-      color: #444;
-      margin-bottom: 15px;
-    }
-    
-    .cta-section {
-      margin-top: 40px;
-      padding: 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 15px;
-      text-align: center;
-      color: white;
-    }
-    
-    .cta-section h3 {
-      font-size: 1.5rem;
-      margin-bottom: 15px;
-    }
-    
-    .cta-section p {
-      margin-bottom: 20px;
-      opacity: 0.95;
-    }
-    
-    .cta-button {
-      display: inline-block;
-      padding: 15px 40px;
-      background: white;
-      color: #764ba2;
-      text-decoration: none;
-      border-radius: 30px;
-      font-weight: bold;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    
-    .cta-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    
-    .footer {
-      text-align: center;
-      padding: 20px;
-      color: #999;
-      font-size: 0.9rem;
-    }
-    
-    @media (max-width: 640px) {
-      .header h1 {
-        font-size: 1.5rem;
-      }
-      
-      .diagnosis-type h2 {
-        font-size: 1.3rem;
-      }
-      
-      .total-score {
-        font-size: 2.5rem;
-      }
-      
-      .content {
-        padding: 20px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>${userName || 'あなた'}様の診断結果</h1>
-      <div class="date">診断日: ${diagnosisDate}</div>
-    </div>
-    
-    <div class="content">
-      <div class="diagnosis-type">
-        <h2>${diagnosisType}</h2>
-        <div class="total-score">${totalScore}<span>/75点</span></div>
-        <div class="score-bar">
-          <div class="score-fill" style="width: ${totalPercent}%">
-            ${totalPercent}%
-          </div>
-        </div>
-      </div>
-      
-      <div class="area-scores">
-        <h3>3つの領域別スコア</h3>
-        
-        <div class="score-item">
-          <div class="score-item-header">
-            <span class="score-item-title">🏃 身体・エネルギー領域</span>
-            <span class="score-item-value">${bodyScore}/25点</span>
-          </div>
-          <div class="score-bar">
-            <div class="score-fill" style="width: ${bodyPercent}%">
-              ${bodyPercent}%
-            </div>
-          </div>
-        </div>
-        
-        <div class="score-item">
-          <div class="score-item-header">
-            <span class="score-item-title">💭 感情・思考・役割領域</span>
-            <span class="score-item-value">${emotionScore}/25点</span>
-          </div>
-          <div class="score-bar">
-            <div class="score-fill" style="width: ${emotionPercent}%">
-              ${emotionPercent}%
-            </div>
-          </div>
-        </div>
-        
-        <div class="score-item">
-          <div class="score-item-header">
-            <span class="score-item-title">🧘 人生・存在・意味領域</span>
-            <span class="score-item-value">${meaningScore}/25点</span>
-          </div>
-          <div class="score-bar">
-            <div class="score-fill" style="width: ${meaningPercent}%">
-              ${meaningPercent}%
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="message-section">
-        <h3>HIROからの個別メッセージ</h3>
-        <p>
-          ${userName || 'あなた'}様、診断を受けていただきありがとうございます。
-        </p>
-        <p>
-          あなたの診断結果「${diagnosisType}」は、多くの成功者が経験する深い心の状態を表しています。
-          外面的には十分な成果を収めながらも、内面では「本当の自分」を求める渇望を抱えていらっしゃるのではないでしょうか。
-        </p>
-        <p>
-          特に${getStrongestArea(bodyScore, emotionScore, meaningScore)}の領域に強い反応が見られます。
-          これは、あなたが既に変化への準備ができていることを示しています。
-        </p>
-        <p>
-          この診断結果は、あなたが新しい人生の扉を開く第一歩です。
-          魂感自在道では、この状態から本物の自分へと変容するための具体的な道筋をご用意しています。
-        </p>
-      </div>
-      
-      <div class="cta-section">
-        <h3>次のステップへ</h3>
-        <p>
-          5日間の無料動画プログラムで、<br>
-          あなたの変容への道筋をお伝えします
-        </p>
-        <a href="https://online.konkanjizai.com/p/jishin-awakening" class="cta-button">
-          無料動画を視聴する
-        </a>
-        <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.9;">
-          ※ 完全無料・いつでも解除可能
-        </p>
-      </div>
-    </div>
-    
-    <div class="footer">
-      <p>© 2025 魂感自在道 - Konkan Jizai Do</p>
-      <p>この診断結果は30日間保存されます</p>
-    </div>
-  </div>
-  
-  <script>
-    // スコアバーのアニメーション
-    window.addEventListener('load', () => {
-      const scoreFills = document.querySelectorAll('.score-fill');
-      scoreFills.forEach(fill => {
-        const width = fill.style.width;
-        fill.style.width = '0%';
-        setTimeout(() => {
-          fill.style.width = width;
-        }, 100);
-      });
-    });
-  </script>
-</body>
-</html>
-  `;
+// 診断タイプを判定する関数
+function getDiagnosisType(totalScore) {
+  if (totalScore <= 15) return '初期段階';
+  if (totalScore <= 30) return '軽度';
+  if (totalScore <= 45) return '中度';
+  if (totalScore <= 60) return '重度';
+  return '極度';
 }
 
-// 最も高いスコアの領域を判定
-function getStrongestArea(bodyScore, emotionScore, meaningScore) {
-  const max = Math.max(bodyScore, emotionScore, meaningScore);
-  if (max === bodyScore) return '身体・エネルギー';
-  if (max === emotionScore) return '感情・思考・役割';
-  return '人生・存在・意味';
+// レベルの説明を取得する関数
+function getScoreDescription(totalScore) {
+  if (totalScore <= 15) {
+    return '微かな違和感を感じ始めている段階です。早期の気づきは大きなチャンスです。';
+  }
+  if (totalScore <= 30) {
+    return '仮面と本来の自分のギャップを認識し始めています。変容への準備が整いつつあります。';
+  }
+  if (totalScore <= 45) {
+    return '偽物感と本物感の狭間で揺れ動いています。今こそ真実の自分と向き合う時です。';
+  }
+  if (totalScore <= 60) {
+    return '深い偽物感に囚われています。しかし、その苦しみこそが変容への強い原動力となります。';
+  }
+  return '極度の偽物感に支配されています。最も深い闇の中にこそ、最も明るい光への道があります。';
+}
+
+// 身体分析のメッセージを取得
+function getBodyAnalysis(bodyScore) {
+  const percent = (bodyScore / 25) * 100;
+  if (percent <= 30) {
+    return '身体からのサインはまだ微かです。日常的な疲労感や違和感として現れていることがあります。身体の声に耳を傾けることで、より深い気づきを得られるでしょう。';
+  }
+  if (percent <= 60) {
+    return '身体が「何かが違う」というメッセージを送っています。慢性的な緊張や疲労感は、本来の自分からのズレを教えてくれています。身体との対話を始める時期です。';
+  }
+  return '身体が強いSOSサインを発しています。この強い反応は、真の変容を求める魂の叫びです。身体の知恵を信頼し、本来の自分へと還る旅を始めましょう。';
+}
+
+// 感情分析のメッセージを取得
+function getEmotionAnalysis(emotionScore) {
+  const percent = (emotionScore / 25) * 100;
+  if (percent <= 30) {
+    return '感情面では比較的安定していますが、時折感じる違和感や空虚感があります。これらの微細な感情は、より深い自己理解への入り口となります。';
+  }
+  if (percent <= 60) {
+    return '役割と本来の自分の間で感情が揺れ動いています。「期待に応えなければ」というプレッシャーと「本当の自分でいたい」という願望の間で葛藤しています。';
+  }
+  return '感情的に大きな負荷がかかっています。仮面をかぶり続けることの限界を感じています。この苦しみは、真の自己表現への強い欲求の表れです。';
+}
+
+// 人生分析のメッセージを取得
+function getLifeAnalysis(lifeScore) {
+  const percent = (lifeScore / 25) * 100;
+  if (percent <= 30) {
+    return '人生の意味や方向性について、漠然とした疑問を抱き始めています。「このままでいいのか」という問いが、新しい可能性への扉を開きます。';
+  }
+  if (percent <= 60) {
+    return '成功や達成の裏側で、深い空虚感を抱えています。外的な成功と内的な充実感のギャップが広がっています。真の充実への道を模索する時です。';
+  }
+  return '人生の根本的な意味を問い直す段階にいます。今まで築いてきたものへの疑問は、より本質的な生き方への招待状です。魂の声に従う勇気を持ちましょう。';
+}
+
+// インポスター症候群の説明
+function getImpostorDescription(totalScore) {
+  if (totalScore >= 30) {
+    return `
+      <div class="revelation-section">
+        <h2 style="text-align: center; color: #333; margin-bottom: 30px; font-size: 28px;">
+          🔍 偽物感の正体
+        </h2>
+        
+        <div class="syndrome-box">
+          <div class="syndrome-name">インポスター症候群</div>
+          <div class="syndrome-subtitle">Impostor Syndrome</div>
+        </div>
+        
+        <p style="margin: 30px 0; line-height: 1.8;">
+          あなたが感じている「偽物感」には、実は名前があります。
+          <span class="highlight">インポスター症候群</span>と呼ばれる心理状態です。
+        </p>
+        
+        <p style="margin: 30px 0; line-height: 1.8;">
+          これは、外面的には成功していても、内面では「自分は偽物だ」「いつか化けの皮が剥がれる」
+          という不安を抱える状態を指します。実は、多くの成功者がこの状態を経験しています。
+        </p>
+        
+        <div class="explanation-list">
+          <h3 style="margin-bottom: 20px;">インポスター症候群の特徴</h3>
+          <ul>
+            <li>成果を出しても「運が良かっただけ」と思ってしまう</li>
+            <li>褒められても素直に受け取れない</li>
+            <li>「本当の自分」を知られることを恐れる</li>
+            <li>完璧主義で自分に厳しい</li>
+            <li>他人と比較して劣等感を感じる</li>
+          </ul>
+        </div>
+        
+        <p style="margin: 30px 0; line-height: 1.8; font-weight: bold; text-align: center;">
+          しかし、この状態は決してあなたの弱さではありません。<br>
+          むしろ、真の自分へと変容する準備が整った証なのです。
+        </p>
+      </div>
+    `;
+  }
+  return '';
+}
+
+// 診断結果HTMLテンプレート
+function getResultTemplate(data) {
+  const {
+    userName = 'あなた',
+    totalScore = 0,
+    bodyScore = 0,
+    emotionScore = 0,
+    lifeScore = 0
+  } = data;
+
+  // パーセンテージ計算
+  const bodyPercent = Math.round((bodyScore / 25) * 100);
+  const emotionPercent = Math.round((emotionScore / 25) * 100);
+  const lifePercent = Math.round((lifeScore / 25) * 100);
+
+  // 診断タイプとメッセージを取得
+  const diagnosisLevel = getDiagnosisType(totalScore);
+  const scoreDescription = getScoreDescription(totalScore);
+  const bodyAnalysis = getBodyAnalysis(bodyScore);
+  const emotionAnalysis = getEmotionAnalysis(emotionScore);
+  const lifeAnalysis = getLifeAnalysis(lifeScore);
+  const impostorSection = getImpostorDescription(totalScore);
+
+  // 現在の日付を取得
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <title>あなたの偽物感診断結果 - 魂感自在道</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+        }
+
+        .diagnosis-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .diagnosis-date {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        /* 診断タイプカード */
+        .diagnosis-type-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .type-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .type-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .overall-score {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-description {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        /* 詳細分析セクション */
+        .analysis-section {
+            background: #f9fafb;
+            border-radius: 15px;
+            padding: 35px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+
+        .analysis-title {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analysis-score {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .score-bar {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            transition: width 1.5s ease-out;
+        }
+
+        .analysis-content {
+            line-height: 1.8;
+            color: #4b5563;
+        }
+
+        .highlight {
+            background: linear-gradient(transparent 60%, #FFD700 60%);
+            padding: 2px 0;
+            font-weight: bold;
+        }
+
+        /* バランス分析 */
+        .balance-section {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        /* 正体セクション */
+        .revelation-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .revelation-section::before {
+            content: '💡';
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 40px;
+            opacity: 0.3;
+        }
+
+        .syndrome-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .syndrome-name {
+            color: #764ba2;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .syndrome-subtitle {
+            color: #888;
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        /* 説明リスト */
+        .explanation-list {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .explanation-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .explanation-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .explanation-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .explanation-list li:last-child {
+            border-bottom: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .user-name {
+                font-size: 28px;
+            }
+
+            .overall-score {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="diagnosis-badge">偽物感診断 分析レポート</div>
+            <h1 class="user-name">${userName}様</h1>
+            <p class="diagnosis-date">診断日: ${dateStr}</p>
+        </div>
+
+        <div class="content">
+            <!-- 診断結果（偽物感の強さ・段階） -->
+            <div class="diagnosis-type-card">
+                <div class="type-label">YOUR DIAGNOSIS RESULT</div>
+                <h2 class="type-name">偽物感 ${diagnosisLevel}</h2>
+                <div class="overall-score">${totalScore}/75点</div>
+                <p class="score-description">
+                    ${scoreDescription}
+                </p>
+            </div>
+
+            <!-- 詳細分析結果 -->
+            <h2 style="text-align: center; color: #333; margin-bottom: 30px; font-size: 28px;">
+                📊 詳細分析結果
+            </h2>
+
+            <!-- 1. 身体・エネルギー領域 -->
+            <div class="analysis-section">
+                <h3 class="analysis-title">
+                    <span>💪</span>
+                    <span>身体・エネルギー領域</span>
+                </h3>
+                <div class="analysis-score">スコア: ${bodyScore}/25点</div>
+                <div class="score-bar">
+                    <div class="score-fill" style="width: ${bodyPercent}%;"></div>
+                </div>
+                <div class="analysis-content">
+                    ${bodyAnalysis}
+                </div>
+            </div>
+
+            <!-- 2. 感情・思考・役割領域 -->
+            <div class="analysis-section">
+                <h3 class="analysis-title">
+                    <span>🧠</span>
+                    <span>感情・思考・役割領域</span>
+                </h3>
+                <div class="analysis-score">スコア: ${emotionScore}/25点</div>
+                <div class="score-bar">
+                    <div class="score-fill" style="width: ${emotionPercent}%;"></div>
+                </div>
+                <div class="analysis-content">
+                    ${emotionAnalysis}
+                </div>
+            </div>
+
+            <!-- 3. 人生・存在・意味領域 -->
+            <div class="analysis-section">
+                <h3 class="analysis-title">
+                    <span>✨</span>
+                    <span>人生・存在・意味領域</span>
+                </h3>
+                <div class="analysis-score">スコア: ${lifeScore}/25点</div>
+                <div class="score-bar">
+                    <div class="score-fill" style="width: ${lifePercent}%;"></div>
+                </div>
+                <div class="analysis-content">
+                    ${lifeAnalysis}
+                </div>
+            </div>
+
+            <!-- 三位一体バランス分析 -->
+            <div class="balance-section">
+                <h2 style="color: #333; margin-bottom: 20px; font-size: 28px;">
+                    ⚖️ 三位一体バランス分析
+                </h2>
+                <div class="chart-container">
+                    <canvas id="balanceChart" width="300" height="300"></canvas>
+                </div>
+                <p style="color: #4b5563; line-height: 1.8;">
+                    身体・感情・人生の3つの領域のバランスを見ることで、<br>
+                    あなたの偽物感がどこから生じているのかが明確になります。
+                </p>
+            </div>
+
+            ${impostorSection}
+
+            <div class="footer">
+                <p>&copy; 2025 魂感自在道 - Konkan Jizai Do</p>
+                <p>この診断結果は30日間保存されます</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // キャンバスでの三角形チャート描画
+        const canvas = document.getElementById('balanceChart');
+        const ctx = canvas.getContext('2d');
+        const centerX = 150;
+        const centerY = 150;
+        const radius = 100;
+
+        // スコアデータ
+        const scores = {
+            body: ${bodyPercent},
+            emotion: ${emotionPercent},
+            life: ${lifePercent}
+        };
+
+        // 三角形の頂点座標
+        const vertices = [
+            { x: centerX, y: centerY - radius, label: '身体' },
+            { x: centerX + radius * Math.cos(Math.PI/6), y: centerY + radius * Math.sin(Math.PI/6), label: '感情' },
+            { x: centerX - radius * Math.cos(Math.PI/6), y: centerY + radius * Math.sin(Math.PI/6), label: '人生' }
+        ];
+
+        // 背景三角形
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        vertices.forEach((v, i) => {
+            if (i === 0) ctx.moveTo(v.x, v.y);
+            else ctx.lineTo(v.x, v.y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+
+        // グリッドライン
+        for (let i = 0.2; i <= 0.8; i += 0.2) {
+            ctx.strokeStyle = '#f3f4f6';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            vertices.forEach((v, j) => {
+                const x = centerX + (v.x - centerX) * i;
+                const y = centerY + (v.y - centerY) * i;
+                if (j === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // スコアの三角形
+        const scoreVertices = [
+            { x: centerX + (vertices[0].x - centerX) * scores.body / 100, 
+              y: centerY + (vertices[0].y - centerY) * scores.body / 100 },
+            { x: centerX + (vertices[1].x - centerX) * scores.emotion / 100, 
+              y: centerY + (vertices[1].y - centerY) * scores.emotion / 100 },
+            { x: centerX + (vertices[2].x - centerX) * scores.life / 100, 
+              y: centerY + (vertices[2].y - centerY) * scores.life / 100 }
+        ];
+
+        ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+        ctx.strokeStyle = '#667eea';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        scoreVertices.forEach((v, i) => {
+            if (i === 0) ctx.moveTo(v.x, v.y);
+            else ctx.lineTo(v.x, v.y);
+        });
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // ラベル
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        vertices.forEach(v => {
+            const labelY = v.y < centerY ? v.y - 10 : v.y + 25;
+            ctx.fillText(v.label, v.x, labelY);
+        });
+
+        // アニメーション
+        window.addEventListener('DOMContentLoaded', () => {
+            const scoreFills = document.querySelectorAll('.score-fill');
+            scoreFills.forEach((fill, index) => {
+                setTimeout(() => {
+                    fill.style.transition = 'width 1.5s ease-out';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>`;
 }
