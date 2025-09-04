@@ -41,7 +41,17 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // resultDataにはすでにsei、mei、userNameが含まれているはず
+    // 念のため確認してログ出力
+    console.log('Received resultData with:', {
+      id,
+      sei: resultData.sei,
+      mei: resultData.mei,
+      userName: resultData.userName
+    });
+
     // Redisに保存（30日間有効）
+    // resultDataをそのまま保存（sei、mei、userNameが含まれている）
     await redis.set(`result:${id}`, JSON.stringify(resultData), {
       ex: 2592000, // 30日間（秒）
     });
