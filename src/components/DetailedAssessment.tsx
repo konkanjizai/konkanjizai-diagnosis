@@ -5,7 +5,7 @@ const generateUniqueId = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 };
 
-// 診断結果を保存してURLを返す関数（修正版：姓と名を個別に受け取る）
+// 診断結果URLを生成する関数（保存はしない）
 const saveResultAndGetUrl = async (
   sei: string,      // 姓を個別に
   mei: string,      // 名を個別に
@@ -15,43 +15,9 @@ const saveResultAndGetUrl = async (
 ) => {
   const id = generateUniqueId();
   
-  // 3領域のスコアを計算
-  const bodyScore = responses.slice(0, 5).reduce((a, b) => a + b, 0);
-  const emotionScore = responses.slice(5, 10).reduce((a, b) => a + b, 0);
-  const meaningScore = responses.slice(10, 15).reduce((a, b) => a + b, 0);
-  
-  const resultData = {
-    sei,                          // 姓を保存
-    mei,                          // 名を保存
-    userName: `${sei} ${mei}`.trim(),  // 結合した名前も保持（互換性のため）
-    totalScore,
-    diagnosisType,
-    bodyScore,
-    emotionScore,
-    meaningScore,
-    responses,
-    timestamp: new Date().toISOString()
-  };
-  
-  try {
-    // Netlify Functionに送信
-    const response = await fetch('/.netlify/functions/save-result', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id, resultData })
-    });
-    
-    if (response.ok) {
-      // 診断結果ページのURL
-      return `https://eloquent-fairy-7272c1.netlify.app/.netlify/functions/get-result?id=${id}`;
-    }
-  } catch (error) {
-    console.error('Error saving result:', error);
-  }
-  
-  return null;
+  // 保存はせず、URLだけを返す
+  // 実際の保存はUTAGEサンクス15ページで行う
+  return `https://eloquent-fairy-7272c1.netlify.app/.netlify/functions/get-result?id=${id}`;
 };
 
 interface DetailedAssessmentProps {
@@ -280,7 +246,7 @@ const DetailedAssessment: React.FC<DetailedAssessmentProps> = ({ userName = '', 
     const sei = nameParts[0] || '';
     const mei = nameParts.slice(1).join(' ') || '';  // 2つ目以降を名とする
     
-    // 診断結果ページを保存してURLを取得（姓と名を個別に渡す）
+    // 診断結果ページのURLを取得（保存はしない）
     const resultPageUrl = await saveResultAndGetUrl(
       sei,      // 姓
       mei,      // 名
