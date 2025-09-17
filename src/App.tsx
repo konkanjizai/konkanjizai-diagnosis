@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import FreeTrialAssessment from './components/FreeTrialAssessment'
 import DetailedAssessment from './components/DetailedAssessment'
+import { initGoogleAdsTag } from './utils/googleTag'
 
 function App() {
   const [assessmentType, setAssessmentType] = useState<string>('');
@@ -10,6 +11,8 @@ function App() {
     const searchParams = new URLSearchParams(window.location.search);
     const typeParam = searchParams.get('type') || 'basic';
     setAssessmentType(typeParam);
+    
+    initGoogleAdsTag();
   }, []);
 
   // URLパラメータに応じて診断を切り替え
