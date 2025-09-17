@@ -2,38 +2,78 @@ import { useState, useEffect } from 'react';
 
 const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [responses, setResponses] = useState<Record<number, number>>({});
+  const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
   
-  // 質問変更時に自動スクロール
   useEffect(() => {
     if (showPreResult) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentStep, showPreResult]);
 
-  // 🔧 修正版：UTAGEカスタムフィールドに直接対応
+  // Google広告トラッキング機能
+  useEffect(() => {
+    // Google Ads タグ初期化
+    const initGoogleAdsTag = () => {
+      const adsId = '924434837';
+      if (!adsId) return;
+
+      if (window.gtag) return;
+
+      const script1 = document.createElement('script');
+      script1.async = true;
+      script1.src = `https://www.googletagmanager.com/gtag/js?id=AW-${adsId}`;
+      document.head.appendChild(script1);
+
+      const script2 = document.createElement('script');
+      script2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-${adsId}');
+      `;
+      document.head.appendChild(script2);
+      
+      window.gtag = function(){
+        window.dataLayer.push(arguments);
+      };
+    };
+
+    initGoogleAdsTag();
+  }, []);
+
+  const trackConversion = () => {
+    const adsId = '924434837';
+    const conversionLabel = 'DOZuCOf2nrEaEJWD57gD';
+    
+    if (window.gtag && adsId && conversionLabel) {
+      window.gtag('event', 'conversion', {
+        'send_to': `AW-${adsId}/${conversionLabel}`
+      });
+      console.log('🎯 Google広告コンバージョン送信:', `AW-${adsId}/${conversionLabel}`);
+    }
+  };
+
   const handleEmailRegistration = () => {
-    // 診断データを準備
-    const totalScore = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
+    const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = (totalScore / 5).toFixed(1);
     
-    // UTAGEフォームURL
-    const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/optin";
+    const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/shindan";
     
-    // ✅ 修正：パラメータ名をUTAGEカスタムフィールド名に直接対応
     const params = new URLSearchParams({
-      free18: preResult?.type || "",                    // diagnosis_type → free18
-      free19: averageScore,                            // diagnosis_score → free19  
-      free20: totalScore.toString(),                   // diagnosis_total → free20
-      free21: JSON.stringify(responses)                // responses → free21
+      free18: preResult?.type || "",
+      free19: averageScore,
+      free20: totalScore.toString(),
+      free21: JSON.stringify(responses)
     });
     
-    // UTAGEフォームにリダイレクト
+    // Google広告コンバージョン送信
+    trackConversion();
+    
     window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
   };
 
-  // 戦略的5問（【完全版】質問内容）
+  // 【元の5問】戦略的質問（絶対変更禁止）
   const questions = [
     {
       id: 1,
@@ -80,7 +120,7 @@ const FreeTrialAssessment = () => {
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
-  const handleResponse = (questionId: number, value: number) => {
+  const handleResponse = (questionId, value) => {
     setResponses(prev => ({
       ...prev,
       [questionId]: value
@@ -104,10 +144,10 @@ const FreeTrialAssessment = () => {
   // 【フリー版5問】の分析ロジック（感情共感＋解決希望型）
   const analyzePreResult = () => {
     if (Object.keys(responses).length !== 5) return null;
-    const totalScore = Object.values(responses).reduce((sum: number, val: number) => sum + val, 0);
+    const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
 
-    const getPreResultType = (score: number) => {
+    const getPreResultType = (score) => {
       if (score <= 1) return {
         type: "「そのままで十分」と言われたいあなた",
         icon: "🌟",
@@ -164,54 +204,54 @@ const FreeTrialAssessment = () => {
 
   const preResult = Object.keys(responses).length === 5 ? analyzePreResult() : null;
 
-  // 結果表示画面
+  // 結果表示画面（元の構成に完全復元）
   if (showPreResult && preResult) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 py-8">
-        <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-3xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-4">
+        <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-3xl p-5 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-3">
               🎯 あなたの偽物感の正体が見えました
             </h1>
-            <p className="text-white/90">深層心理分析の結果をお伝えします</p>
+            <p className="text-white/90 text-base">深層心理分析の結果をお伝えします</p>
           </div>
 
           {/* 結果表示 */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="mb-6">
-              <div className="text-6xl mb-4">{preResult.icon}</div>
-              <h2 className="text-2xl font-bold mb-4 leading-relaxed text-white">
+              <div className="text-5xl sm:text-6xl mb-4">{preResult.icon}</div>
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 leading-relaxed text-white px-2">
                 {preResult.type}
               </h2>
             </div>
           </div>
 
           {/* 現状認識セクション */}
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl mb-6 border border-white/20">
-            <h3 className="text-lg font-bold text-yellow-400 mb-3">
+          <div className="bg-white/10 backdrop-blur-sm p-5 sm:p-6 rounded-2xl mb-5 sm:mb-6 border border-white/20">
+            <h3 className="text-lg sm:text-lg font-bold text-yellow-400 mb-3">
               💭 今のあなたの状態
             </h3>
-            <p className="text-white/90 leading-relaxed">
+            <p className="text-white/90 leading-relaxed text-base sm:text-base">
               {preResult.currentState}
             </p>
           </div>
 
           {/* 欲求・願望セクション */}
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl mb-6 border border-white/20">
-            <h3 className="text-lg font-bold text-yellow-400 mb-3">
+          <div className="bg-white/10 backdrop-blur-sm p-5 sm:p-6 rounded-2xl mb-5 sm:mb-6 border border-white/20">
+            <h3 className="text-lg sm:text-lg font-bold text-yellow-400 mb-3">
               💫 あなたが本当に求めているもの
             </h3>
-            <p className="text-white/90 leading-relaxed">
+            <p className="text-white/90 leading-relaxed text-base sm:text-base">
               {preResult.desire}
             </p>
           </div>
 
           {/* 希望提示セクション */}
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl mb-8 border border-white/20">
-            <h3 className="text-lg font-bold text-yellow-400 mb-3">
+          <div className="bg-white/10 backdrop-blur-sm p-5 sm:p-6 rounded-2xl mb-6 sm:mb-8 border border-white/20">
+            <h3 className="text-lg sm:text-lg font-bold text-yellow-400 mb-3">
               ✨ でも、大丈夫です
             </h3>
-            <p className="text-white/90 leading-relaxed mb-4">
+            <p className="text-white/90 leading-relaxed mb-4 text-base sm:text-base">
               {preResult.hope}
             </p>
             <p className="text-white/70 text-sm italic">
@@ -219,196 +259,125 @@ const FreeTrialAssessment = () => {
             </p>
           </div>
 
-          {/* さらなる価値の提示 */}
-          <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 backdrop-blur-sm p-6 rounded-2xl mb-8 border border-yellow-400/50">
-            <h3 className="text-xl font-bold text-white mb-4 text-center">
-              🔍 でも、5問だけでは見えない部分があります
-            </h3>
-            <p className="text-center text-white/80 mb-4 text-sm">
-              実は、あなたの本当の状態を知るには<strong className="text-yellow-400">さらに詳細な分析</strong>が必要です
-            </p>
-            <div className="space-y-3">
-              <div className="flex items-center text-white/90">
-                <span className="text-yellow-400 mr-3 text-xl">📊</span>
-                <span><strong>完全版15項目診断</strong>による徹底的な自己分析</span>
-              </div>
-              <div className="flex items-center text-white/90">
-                <span className="text-yellow-400 mr-3 text-xl">🧬</span>
-                <span>なぜそう感じるのか？<strong>科学的根拠に基づく詳細レポート</strong></span>
-              </div>
-              <div className="flex items-center text-white/90">
-                <span className="text-yellow-400 mr-3 text-xl">🗺️</span>
-                <span>{preResult.valueProposition}</span>
-              </div>
-              <div className="flex items-center text-white/90">
-                <span className="text-yellow-400 mr-3 text-xl">💼</span>
-                <span>同じタイプの人が実際に変われた<strong>具体的事例集</strong></span>
-              </div>
-              <div className="flex items-center text-white/90">
-                <span className="text-yellow-400 mr-3 text-xl">⚡</span>
-                <span>今すぐ始められる<strong>3つの実践ステップ</strong></span>
-              </div>
-            </div>
-          </div>
-
-          {/* メールアドレス取得フォーム */}
-          <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm p-6 rounded-2xl mb-6 relative overflow-hidden border-2 border-yellow-400/70 shadow-2xl">
-            <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-bold px-3 py-2 rounded-full shadow-lg animate-bounce">
-              <span className="flex items-center">
-                ⭐ 完全無料 ⭐
-              </span>
-            </div>
-            <div className="text-center mb-4">
-              <h3 className="text-xl font-bold text-white mb-2">
-                📧 完全版診断と詳細分析レポートを受け取る
+          {/* メールアドレス取得フォーム - シンプル版 */}
+          <div className="bg-white/95 backdrop-blur-sm p-5 sm:p-8 rounded-3xl mb-6 relative shadow-2xl">
+            
+            {/* メインタイトル */}
+            <div className="text-center mb-6 sm:mb-8">
+              <h3 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4 leading-tight">
+                ジシン覚醒<br/>
+                <span className="text-yellow-500 text-2xl sm:text-4xl">5Days Video<br className="sm:hidden"/> プログラム</span>
               </h3>
-              <p className="text-white/80 text-sm mb-3">
-                <strong className="text-yellow-400">15項目の詳細診断</strong>で、あなたの状態を徹底分析<br/>
-                + <strong className="text-yellow-400">個別対応の改善プラン</strong>を今すぐメール配信
-              </p>
-              <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl text-sm text-white/90 border border-white/20">
-                ⚠️ <strong>注意</strong>：このような詳細分析は通常有料サービスです<br/>
-                今だけ<strong className="text-yellow-400">期間限定で完全無料</strong>でお送りしています
+              
+              <div className="text-gray-700 text-lg sm:text-xl font-bold leading-relaxed mb-4">
+                「偽物感」はあなたが特別な証！<br/>
+                自分を楽しめば人生は上手くいく！
+              </div>
+              
+              <div className="text-lg sm:text-xl font-bold text-yellow-500 my-4">
+                実践ワーク中心だから<br className="sm:hidden"/>効果が持続する！
+              </div>
+              
+              <div className="text-gray-700 text-base sm:text-lg font-bold mb-4">
+                満たされながら成功して<br className="sm:hidden"/>生きていく方法を<br/>
+                完全無料で公開します！
               </div>
             </div>
             
-            <div className="text-center mb-3">
-              <span className="text-yellow-400 text-3xl animate-bounce inline-block">⬇</span>
-            </div>
-            
+            {/* ボタン */}
             <div className="space-y-4">
               <button 
                 onClick={handleEmailRegistration}
-                className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-5 rounded-xl font-bold hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 transform hover:scale-110 shadow-2xl relative overflow-hidden group animate-pulse-custom"
+                className="w-full bg-yellow-400 text-gray-900 px-5 sm:px-8 py-4 sm:py-6 rounded-2xl text-lg sm:text-xl font-black hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-xl border-4 border-gray-900"
                 style={{
-                  animation: 'pulseScale 2s ease-in-out infinite',
-                  boxShadow: '0 0 40px rgba(251, 191, 36, 0.6), 0 10px 25px rgba(0, 0, 0, 0.3)',
+                  boxShadow: '4px 4px 0px rgba(0, 0, 0, 1)',
                 }}>
-                <span className="relative z-10 flex items-center justify-center text-lg">
-                  <span className="mr-2 text-2xl animate-bounce">🔍</span>
-                  完全版15項目診断を今すぐ受け取る（無料）
-                  <span className="ml-2 text-2xl animate-bounce" style={{animationDelay: '0.5s'}}>→</span>
+                <span className="flex items-center justify-center">
+                  今すぐ無料で受け取る！→
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               </button>
-              <style>{`
-                @keyframes pulseScale {
-                  0%, 100% {
-                    transform: scale(1);
-                  }
-                  50% {
-                    transform: scale(1.05);
-                  }
-                }
-              `}</style>
-            </div>
-            
-            <p className="text-center text-xs text-white/60 mt-3">
-              ※ 質の高い分析レポートをお届けします。不要になれば即座に配信停止できます。
-            </p>
-            
-            {/* 緊急性と希少性の追加 */}
-            <div className="mt-4 p-3 bg-gradient-to-r from-orange-500/30 to-red-500/30 rounded-xl border-2 border-orange-400 animate-pulse">
-              <p className="text-center text-sm text-white font-bold">
-                ⏰ <strong className="text-yellow-400 text-base">このレベルの詳細分析</strong>を無料提供できるのは<br/>
-                システムの都合上<strong className="text-orange-300 text-base">今月末まで</strong>の期間限定です
-              </p>
             </div>
           </div>
 
-          {/* 社会的証明と安心感 */}
-          <div className="text-center">
-            <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm px-4 py-2 rounded-full inline-block mb-4">
-              <p className="text-sm text-white font-bold">
-                ✨ 既に<span className="text-yellow-400 text-lg">2,847名</span>の方が新しい生き方を見つけています ✨
-              </p>
-            </div>
-            <div className="border-t border-white/20 pt-4">
-              <p className="text-xs text-white/50 mb-2">
-                「もう一度最初から診断したい」という方は...
-              </p>
-              <button 
-                onClick={() => {
-                  setCurrentStep(0);
-                  setResponses({});
-                  setShowPreResult(false);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="text-white/60 text-sm hover:text-white/80 transition-colors underline"
-              >
-                🔄 診断をやり直す
-              </button>
-            </div>
+          {/* フッター */}
+          <div className="text-center text-white/60 text-xs">
+            <a 
+              href="https://konkanjizai.com/privacy-policy/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-white/80 transition-colors underline"
+            >
+              プライバシーポリシー
+            </a>
+            <p className="mt-2">
+              Copyright(c) 2025 魂感自在 All Rights Reserved.
+            </p>
           </div>
         </div>
       </div>
     );
   }
 
-  // 診断質問画面（新しいUIデザイン）
+  // 診断質問画面
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-      <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-3xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
+      <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full">
         
-        {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-2">
+        <div className="text-center mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-1 sm:mb-2">
             偽物感の正体診断
           </h1>
-          <p className="text-white/80">3分でわかる深層心理分析</p>
+          <p className="text-white/80 text-sm sm:text-base">3分でわかる深層心理分析</p>
         </div>
 
-        {/* プログレスバー */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-white/80 text-sm">
+        <div className="mb-4 sm:mb-8">
+          <div className="flex justify-between items-center mb-1 sm:mb-2">
+            <span className="text-white/80 text-xs sm:text-sm">
               質問 {currentStep + 1} / {questions.length}
             </span>
-            <span className="text-white/80 text-sm">
+            <span className="text-white/80 text-xs sm:text-sm">
               {Math.round(progress)}% 完了
             </span>
           </div>
-          <div className="w-full bg-white/20 rounded-full h-2">
+          <div className="w-full bg-white/20 rounded-full h-1.5 sm:h-2">
             <div 
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-300" 
+              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-1.5 sm:h-2 rounded-full transition-all duration-300" 
               style={{ width: `${progress}%` }}
             ></div>
           </div>
         </div>
 
-        {/* 質問カード */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4 sm:mb-8">
           <div 
-            className="inline-block px-4 py-2 rounded-full text-sm font-semibold text-white mb-4"
+            className="inline-block px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-4"
             style={{ backgroundColor: currentQuestion.categoryColor }}
           >
             {currentQuestion.category}
           </div>
-          <h2 className="text-2xl font-bold text-white mb-4 leading-relaxed">
+          <h2 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-4 leading-relaxed px-2">
             {currentQuestion.text}
           </h2>
-          <p className="text-sm text-white/70 italic">
+          <p className="text-xs sm:text-sm text-white/70 italic px-2">
             {currentQuestion.explanation}
           </p>
         </div>
 
-        {/* 選択肢（1-5のラジオボタン形式） */}
-        <div className="space-y-3 mb-8">
+        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-8">
           {[1, 2, 3, 4, 5].map(value => (
             <button
               key={value}
               onClick={() => handleResponse(currentQuestion.id, value)}
-              className={`w-full p-4 rounded-xl text-left transition-all duration-200 ${
+              className={`w-full p-2.5 sm:p-4 rounded-lg sm:rounded-xl text-left transition-all duration-200 text-sm sm:text-base ${
                 responses[currentQuestion.id] === value
                   ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-semibold'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
               <div className="flex items-center">
-                <span className="mr-4 text-xl">
+                <span className="mr-3 sm:mr-4 text-base sm:text-xl">
                   {responses[currentQuestion.id] === value ? '●' : '○'}
                 </span>
-                <span>
+                <span className="text-xs sm:text-base">
                   {value === 1 && 'まったく当てはまらない'}
                   {value === 2 && 'あまり当てはまらない'}
                   {value === 3 && 'どちらとも言えない'}
@@ -420,27 +389,25 @@ const FreeTrialAssessment = () => {
           ))}
         </div>
 
-        {/* ナビゲーションボタン */}
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-2">
           <button
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className="px-6 py-3 bg-white/10 text-white rounded-xl disabled:opacity-50 hover:bg-white/20 transition-all duration-200"
+            className="px-4 py-2 sm:px-6 sm:py-3 bg-white/10 text-white rounded-lg sm:rounded-xl disabled:opacity-50 hover:bg-white/20 transition-all duration-200 text-sm sm:text-base"
           >
-            ← 前の質問
+            ← 前へ
           </button>
           <button
             onClick={handleNext}
             disabled={!responses[currentQuestion.id]}
-            className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-semibold rounded-xl disabled:opacity-50 hover:from-yellow-300 hover:to-orange-400 transition-all duration-300"
+            className="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-semibold rounded-lg sm:rounded-xl disabled:opacity-50 hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 text-sm sm:text-base"
           >
-            {currentStep === questions.length - 1 ? '結果を見る' : '次の質問 →'}
+            {currentStep === questions.length - 1 ? '結果を見る' : '次へ →'}
           </button>
         </div>
 
-        {/* 価値提示 */}
-        <div className="mt-8 bg-white/10 backdrop-blur-sm p-4 rounded-2xl text-center border border-white/20">
-          <p className="text-sm text-white/80">
+        <div className="mt-4 sm:mt-8 bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center border border-white/20 hidden sm:block">
+          <p className="text-xs sm:text-sm text-white/80">
             💡 この後、あなたの心の状態をより詳しく分析し<br/>
             <strong className="text-yellow-400">具体的な解決方法</strong>を無料でお送りします
           </p>
