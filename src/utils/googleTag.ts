@@ -2,7 +2,8 @@ export const initGoogleAdsTag = () => {
   const adsId = import.meta.env.VITE_GOOGLE_ADS_ID;
   if (!adsId) return;
 
-  if (window.gtag) return;
+  // @ts-ignore でTypeScriptエラーを無視
+  if ((window as any).gtag) return;
 
   // Google広告のタグを読み込み
   const script1 = document.createElement('script');
@@ -20,8 +21,9 @@ export const initGoogleAdsTag = () => {
   `;
   document.head.appendChild(script2);
   
-  window.gtag = function(){
-    window.dataLayer.push(arguments);
+  // @ts-ignore でTypeScriptエラーを無視
+  (window as any).gtag = function(){
+    (window as any).dataLayer.push(arguments);
   };
 };
 
@@ -30,8 +32,9 @@ export const trackConversion = () => {
   const adsId = import.meta.env.VITE_GOOGLE_ADS_ID;
   const conversionLabel = import.meta.env.VITE_CONVERSION_LABEL;
   
-  if (window.gtag && adsId && conversionLabel) {
-    window.gtag('event', 'conversion', {
+  // @ts-ignore でTypeScriptエラーを無視
+  if ((window as any).gtag && adsId && conversionLabel) {
+    (window as any).gtag('event', 'conversion', {
       'send_to': `AW-${adsId}/${conversionLabel}`
     });
   }
