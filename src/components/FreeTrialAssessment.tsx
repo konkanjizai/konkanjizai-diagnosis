@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
+import { initGoogleAdsTag, trackConversion, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
 const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -12,48 +13,10 @@ const FreeTrialAssessment = () => {
     }
   }, [currentStep, showPreResult]);
 
-  // Google広告トラッキング機能
+  // Google広告・GTM初期化（新しいバージョン）
   useEffect(() => {
-    // Google Ads タグ初期化
-    const initGoogleAdsTag = () => {
-      const adsId = '924434837';
-      if (!adsId) return;
-
-      if (window.gtag) return;
-
-      const script1 = document.createElement('script');
-      script1.async = true;
-      script1.src = `https://www.googletagmanager.com/gtag/js?id=AW-${adsId}`;
-      document.head.appendChild(script1);
-
-      const script2 = document.createElement('script');
-      script2.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'AW-${adsId}');
-      `;
-      document.head.appendChild(script2);
-      
-      window.gtag = function(){
-        window.dataLayer.push(arguments);
-      };
-    };
-
     initGoogleAdsTag();
   }, []);
-
-  const trackConversion = () => {
-    const adsId = '924434837';
-    const conversionLabel = 'DOZuCOf2nrEaEJWD57gD';
-    
-    if (window.gtag && adsId && conversionLabel) {
-      window.gtag('event', 'conversion', {
-        'send_to': `AW-${adsId}/${conversionLabel}`
-      });
-      console.log('🎯 Google広告コンバージョン送信:', `AW-${adsId}/${conversionLabel}`);
-    }
-  };
 
   const handleEmailRegistration = () => {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
@@ -68,9 +31,23 @@ const FreeTrialAssessment = () => {
       free21: JSON.stringify(responses)
     });
     
-    // Google広告コンバージョン送信
+    // 新しいトラッキング（GTM統合版）
+    console.log('🎯 診断完了 - コンバージョン送信開始');
+    
+    // 1. 診断完了の詳細トラッキング
+    trackDiagnosisComplete(preResult?.type || "", totalScore, parseFloat(averageScore));
+    
+    // 2. Google広告コンバージョン送信
     trackConversion();
     
+    // 3. カスタムイベント送信
+    trackCustomEvent('email_registration', {
+      diagnosis_type: preResult?.type || "",
+      total_score: totalScore,
+      average_score: parseFloat(averageScore)
+    });
+    
+    // UTAGEに移動
     window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
   };
 
