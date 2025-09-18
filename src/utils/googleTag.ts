@@ -8,9 +8,9 @@ export const initGoogleAdsTag = () => {
     // GTMが存在する場合：GTM経由でGoogle広告も管理
     console.log('GTM detected - using GTM for Google Ads tracking');
     
-    // GTM用にGoogle広告設定をdataLayerにpush
+    // GTM用にGoogle広告設定をdataLayerにpush（修正：独自イベント名を使用）
     window.dataLayer.push({
-      'event': 'gtm.dom',
+      'event': 'diagnosis_gtm_detected', // 修正：gtm.dom → 独自イベント名に変更
       'google_ads_id': adsId
     });
     return;
