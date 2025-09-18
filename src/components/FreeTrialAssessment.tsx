@@ -40,12 +40,12 @@ const FreeTrialAssessment = () => {
     // 2. Google広告コンバージョン送信
     trackConversion();
     
-    // 3. カスタムイベント送信
-    trackCustomEvent('email_registration', {
-      diagnosis_type: preResult?.type || "",
-      total_score: totalScore,
-      average_score: parseFloat(averageScore)
-    });
+    // 3. email_registration イベントは削除（UTAGEで処理されるため）
+    // trackCustomEvent('email_registration', {
+    //   diagnosis_type: preResult?.type || "",
+    //   total_score: totalScore,
+    //   average_score: parseFloat(averageScore)
+    // });
     
     // UTAGEに移動
     window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
