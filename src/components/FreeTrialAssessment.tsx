@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { initGoogleAdsTag, trackConversion, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
+// ✅ 修正: trackConversion を import から削除
+import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
 const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -31,21 +32,22 @@ const FreeTrialAssessment = () => {
       free21: JSON.stringify(responses)
     });
     
-    // 新しいトラッキング（GTM統合版）
-    console.log('🎯 診断完了 - コンバージョン送信開始');
+    // ✅ 修正: 診断完了の詳細トラッキング（コンバージョンではない）
+    console.log('🎯 診断完了 - UTAGEへ遷移');
     
-    // 1. 診断完了の詳細トラッキング
+    // 1. 診断完了の詳細トラッキング（関心段階の計測）
     trackDiagnosisComplete(preResult?.type || "", totalScore, parseFloat(averageScore));
     
-    // 2. Google広告コンバージョン送信
-    trackConversion();
+    // ❌ 削除: Google広告コンバージョン送信（不適切）
+    // trackConversion(); // この行を削除
     
-    // 3. email_registration イベントは削除（UTAGEで処理されるため）
-    // trackCustomEvent('email_registration', {
-    //   diagnosis_type: preResult?.type || "",
-    //   total_score: totalScore,
-    //   average_score: parseFloat(averageScore)
-    // });
+    // 3. UTAGEへの遷移イベント（関心から検討段階への移行）
+    trackCustomEvent('utage_transition', {
+      diagnosis_type: preResult?.type || "",
+      total_score: totalScore,
+      average_score: parseFloat(averageScore),
+      transition_to: 'optin_page'
+    });
     
     // UTAGEに移動
     window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
