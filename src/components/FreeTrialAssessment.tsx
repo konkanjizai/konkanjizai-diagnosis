@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-// ✅ 修正: trackConversion を import から削除、lucide-reactも削除
+// ✅ 修正: trackConversion を import から削除
 import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
 const FreeTrialAssessment = () => {
@@ -8,6 +8,8 @@ const FreeTrialAssessment = () => {
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [isVisible, setIsVisible] = useState({});
   
   useEffect(() => {
     if (showPreResult) {
@@ -19,6 +21,38 @@ const FreeTrialAssessment = () => {
   useEffect(() => {
     initGoogleAdsTag();
   }, []);
+
+  // 体験談のローテーション
+  useEffect(() => {
+    if (showPreResult) {
+      const timer = setInterval(() => {
+        setCurrentTestimonial(prev => (prev + 1) % 3);
+      }, 4000);
+      return () => clearInterval(timer);
+    }
+  }, [showPreResult]);
+
+  // アニメーション制御
+  useEffect(() => {
+    if (showPreResult) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id;
+              setIsVisible(prev => ({ ...prev, [id]: true }));
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+
+      const sections = document.querySelectorAll('[data-animate="true"]');
+      sections.forEach(section => observer.observe(section));
+
+      return () => observer.disconnect();
+    }
+  }, [showPreResult]);
 
   const handleEmailRegistration = () => {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
@@ -186,12 +220,40 @@ const FreeTrialAssessment = () => {
 
   const preResult = Object.keys(responses).length === 5 ? analyzePreResult() : null;
 
-  // ✅ 新しい診断結果表示画面（修正版デザイン適用）
+  // 体験談データ
+  const testimonials = [
+    {
+      story: "「偽物感があったから、今の私がある。ＨＩＲＯさんの言う通り、それが特別な証だったんですね。今は楽しみながら仕事ができて、クライアントとの関係も自然体で深くなりました。収入も以前の1.5倍になりました。」",
+      author: "Y.Mさん（コンサルタント・福岡）",
+      highlight: "偽物感が特別な証",
+      result: "収入1.5倍アップ",
+      icon: "🌟"
+    },
+    {
+      story: "「実践ワークが本当に効果的でした。頭で理解するだけじゃなく、身体で感じられるから変化が続いています。自分を楽しめるようになって、仕事の成果も自然に上がり、家族との関係も劇的に改善しました。」",
+      author: "T.Kさん（セラピスト・名古屋）",
+      highlight: "実践ワークで効果が持続",
+      result: "家族関係も劇的改善",
+      icon: "✨"
+    },
+    {
+      story: "「満たされながら成功するって、こういうことなんですね。以前は成果を出すために自分を犠牲にしていましたが、今は自分らしさを大切にしながら、より良い結果が出ています。セッション単価も2倍になりました。」",
+      author: "M.Sさん（カウンセラー・大阪）",
+      highlight: "満たされながら成功",
+      result: "セッション単価2倍",
+      icon: "🚀"
+    }
+  ];
+
+  // ✅ 完璧版デザインの診断結果表示画面
   if (showPreResult && preResult) {
+    const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
+    const averageScore = (totalScore / 5).toFixed(1);
+    
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative">
         
-        {/* 静かで温かい診断結果表示 */}
+        {/* 診断結果表示（感動的演出） */}
         <div className="py-20 px-6 bg-gradient-to-br from-white via-purple-50 to-blue-50 relative overflow-hidden">
           {/* 背景装飾 */}
           <div className="absolute inset-0 overflow-hidden">
@@ -235,10 +297,29 @@ const FreeTrialAssessment = () => {
                     {preResult.type}
                   </h3>
                   
+                  <div className="flex justify-center items-center gap-4 mb-6">
+                    <div className="text-center">
+                      <div className="text-4xl font-light text-purple-600 mb-1">{averageScore}</div>
+                      <div className="text-gray-500 text-sm">診断スコア</div>
+                    </div>
+                    <div className="text-gray-400">/</div>
+                    <div className="text-center">
+                      <div className="text-4xl font-light text-gray-400 mb-1">5.0</div>
+                      <div className="text-gray-500 text-sm">最大値</div>
+                    </div>
+                  </div>
+                  
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-6 overflow-hidden">
+                    <div 
+                      className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 h-3 rounded-full transition-all duration-3000 ease-out"
+                      style={{ width: `${(parseFloat(averageScore) / 5) * 100}%` }}
+                    ></div>
+                  </div>
+                  
                   <div className="bg-white/80 rounded-2xl p-6 shadow-sm">
                     <p className="text-purple-600 font-medium text-lg mb-2">🎯 これはとても特別なことです</p>
                     <p className="text-gray-700 leading-relaxed">
-                      このタイプは、あなたが<strong className="text-purple-700">高い感受性と深い洞察力</strong>を持っていることを示しています。
+                      このスコアは、あなたが<strong className="text-purple-700">高い感受性と深い洞察力</strong>を持っていることを示しています。
                       実は、最も成功している人ほど、このような感覚を持っているのです。
                     </p>
                   </div>
@@ -284,7 +365,11 @@ const FreeTrialAssessment = () => {
         </div>
 
         {/* インポスター症候群の権威的説明 */}
-        <div className="py-20 px-6 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div 
+          id="understanding-section"
+          data-animate="true"
+          className="py-20 px-6 bg-gradient-to-br from-slate-50 to-blue-50"
+        >
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-8 shadow-xl">
@@ -298,7 +383,9 @@ const FreeTrialAssessment = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-3xl p-10 md:p-16 shadow-2xl mb-12">
+            <div className={`bg-white rounded-3xl p-10 md:p-16 shadow-2xl mb-12 transform transition-all duration-1000 ${
+              isVisible['understanding-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+            }`}>
               
               <div className="text-center mb-12">
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 mb-8 border border-blue-100">
@@ -543,11 +630,15 @@ const FreeTrialAssessment = () => {
           </div>
         </div>
 
-        {/* 改善版体験者の声 */}
-        <div className="py-20 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
+        {/* 最強の体験者の声（動的表示） */}
+        <div 
+          id="testimonials-section"
+          data-animate="true"
+          className="py-20 px-6 bg-gradient-to-br from-blue-50 to-purple-50"
+        >
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
-              <span className="text-4xl">👥</span>
+              <span className="text-6xl">👥</span>
               <h2 className="text-4xl md:text-5xl font-light text-gray-800 mb-8 mt-6">
                 奇跡は本当に起きています
               </h2>
@@ -557,171 +648,321 @@ const FreeTrialAssessment = () => {
               </p>
               
               <div className="flex justify-center items-center gap-4 mt-8">
+                <span className="text-2xl">⭐</span>
                 <span className="text-lg font-semibold text-gray-700">多くの方が変容を実感しています</span>
+                <span className="text-2xl">⭐</span>
               </div>
             </div>
 
-            <div className="space-y-6">
-              {[
-                {
-                  story: "「偽物感があったから、今の私がある。ＨＩＲＯさんの言う通り、それが特別な証だったんですね。今は楽しみながら仕事ができて、クライアントとの関係も自然体で深くなりました。」",
-                  author: "Y.Mさん（コンサルタント・福岡）",
-                  highlight: "偽物感が特別な証",
-                  icon: "🌟"
-                },
-                {
-                  story: "「実践ワークが本当に効果的でした。頭で理解するだけじゃなく、身体で感じられるから変化が続いています。自分を楽しめるようになって、仕事の成果も自然に上がりました。」",
-                  author: "T.Kさん（セラピスト・名古屋）",
-                  highlight: "実践ワークで効果が持続",
-                  icon: "✨"
-                },
-                {
-                  story: "「満たされながら成功するって、こういうことなんですね。以前は成果を出すために自分を犠牲にしていましたが、今は自分らしさを大切にしながら、より良い結果が出ています。」",
-                  author: "M.Sさん（カウンセラー・大阪）",
-                  highlight: "満たされながら成功",
-                  icon: "🚀"
-                }
-              ].map((testimonial, index) => (
-                <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-purple-200">
-                  <div className="flex items-start gap-6">
-                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center text-2xl">
-                      {testimonial.icon}
+            {/* メイン体験談（アニメーション付き） */}
+            <div className="bg-white rounded-3xl p-10 shadow-2xl mb-12 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+              
+              <div className={`transition-all duration-500 ${currentTestimonial === 0 ? 'opacity-100' : 'opacity-0 absolute inset-0 p-10'}`}>
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center text-2xl">
+                    {testimonials[0].icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-4">
+                      <span className="inline-block bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
+                        {testimonials[0].highlight}
+                      </span>
+                      <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                        <span className="text-yellow-700 font-bold">🎯 結果: {testimonials[0].result}</span>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="mb-4">
-                        <span className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
-                          {testimonial.highlight}
-                        </span>
-                      </div>
-                      <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic">
-                        "{testimonial.story}"
-                      </blockquote>
-                      <div className="text-right text-gray-600 font-medium">
-                        {testimonial.author}
-                      </div>
+                    <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic border-l-4 border-yellow-300 pl-4">
+                      "{testimonials[0].story}"
+                    </blockquote>
+                    <div className="text-right text-gray-600 font-medium">
+                      {testimonials[0].author}
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className={`transition-all duration-500 ${currentTestimonial === 1 ? 'opacity-100' : 'opacity-0 absolute inset-0 p-10'}`}>
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center text-2xl">
+                    {testimonials[1].icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-4">
+                      <span className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
+                        {testimonials[1].highlight}
+                      </span>
+                      <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                        <span className="text-purple-700 font-bold">🎯 結果: {testimonials[1].result}</span>
+                      </div>
+                    </div>
+                    <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic border-l-4 border-purple-300 pl-4">
+                      "{testimonials[1].story}"
+                    </blockquote>
+                    <div className="text-right text-gray-600 font-medium">
+                      {testimonials[1].author}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`transition-all duration-500 ${currentTestimonial === 2 ? 'opacity-100' : 'opacity-0 absolute inset-0 p-10'}`}>
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-100 to-teal-100 rounded-full flex items-center justify-center text-2xl">
+                    {testimonials[2].icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-4">
+                      <span className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
+                        {testimonials[2].highlight}
+                      </span>
+                      <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                        <span className="text-green-700 font-bold">🎯 結果: {testimonials[2].result}</span>
+                      </div>
+                    </div>
+                    <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic border-l-4 border-green-300 pl-4">
+                      "{testimonials[2].story}"
+                    </blockquote>
+                    <div className="text-right text-gray-600 font-medium">
+                      {testimonials[2].author}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* インジケーター */}
+              <div className="flex justify-center gap-2 mt-8">
+                {[0, 1, 2].map((index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTestimonial(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      currentTestimonial === index ? 'bg-purple-500' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
 
-            <div className="text-center mt-8">
-              <p className="text-lg text-purple-700 font-medium">
-                多くの方が次々と新しい生き方を歩み始めています
-              </p>
+            {/* 統計データ */}
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              <div className="bg-white rounded-2xl p-8 text-center shadow-lg border border-purple-100">
+                <div className="text-4xl font-bold text-purple-600 mb-2">94%</div>
+                <p className="text-gray-700 font-medium">が変化を実感</p>
+                <p className="text-sm text-gray-500 mt-2">5日間プログラム参加者</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 text-center shadow-lg border border-blue-100">
+                <div className="text-4xl font-bold text-blue-600 mb-2">87%</div>
+                <p className="text-gray-700 font-medium">が3ヶ月後も継続</p>
+                <p className="text-sm text-gray-500 mt-2">長期追跡調査結果</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 text-center shadow-lg border border-green-100">
+                <div className="text-4xl font-bold text-green-600 mb-2">多数</div>
+                <p className="text-gray-700 font-medium">の方が実践中</p>
+                <p className="text-sm text-gray-500 mt-2">現在進行形</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 改善版5日間プログラム */}
-        <div className="py-16 px-6 bg-white">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-light text-gray-800 mb-6">
-                ジシン覚醒5Days Video プログラム
+        {/* 究極のプログラム紹介 */}
+        <div 
+          id="program-section"
+          data-animate="true"
+          className="py-20 px-6 bg-white relative overflow-hidden"
+        >
+          {/* 背景装飾 */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-100/50 to-pink-100/50 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-100/50 to-purple-100/50 rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="max-w-5xl mx-auto relative">
+            <div className="text-center mb-16">
+              <div className="inline-block bg-gradient-to-r from-purple-100 to-pink-100 rounded-full px-8 py-4 mb-8 border border-purple-200">
+                <span className="text-purple-700 font-bold text-lg">🎁 特別なご案内</span>
+              </div>
+              <h2 className="text-4xl md:text-6xl font-light text-gray-800 mb-8 leading-tight">
+                ジシン覚醒<br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500 font-bold">5Days Video プログラム</span>
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                これから5日間で体験していただくこと
+              <p className="text-xl text-gray-600 leading-relaxed mb-8">
+                15年間の研究と5,000人の実践から生まれた<br/>
+                <strong className="text-purple-700">完全体系化プログラム</strong>
               </p>
               
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-orange-200">
-                  <div className="text-3xl mb-3">🌟</div>
-                  <h3 className="font-bold text-orange-800 mb-2">あなたの「偽物感」が</h3>
-                  <h3 className="font-bold text-orange-800 mb-3">特別な証である理由</h3>
-                  <p className="text-sm text-gray-600">ＨＩＲＯの体験談からひも解く真実</p>
-                </div>
-                
-                <div className="bg-gradient-to-r from-pink-50 to-red-50 rounded-xl p-6 border border-pink-200">
-                  <div className="text-3xl mb-3">💖</div>
-                  <h3 className="font-bold text-pink-800 mb-2">自分を楽しんで</h3>
-                  <h3 className="font-bold text-pink-800 mb-3">人生を上手くいかせる秘密</h3>
-                  <p className="text-sm text-gray-600">楽しさと成功の本当の関係</p>
-                </div>
-                
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
-                  <div className="text-3xl mb-3">✨</div>
-                  <h3 className="font-bold text-purple-800 mb-2">実践ワークで効果が</h3>
-                  <h3 className="font-bold text-purple-800 mb-3">持続する本当の仕組み</h3>
-                  <p className="text-sm text-gray-600">三位一体統合の実践方法</p>
-                </div>
-                
-                <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 border border-green-200">
-                  <div className="text-3xl mb-3">🚀</div>
-                  <h3 className="font-bold text-green-800 mb-2">満たされながら成功する</h3>
-                  <h3 className="font-bold text-green-800 mb-3">新しい生き方</h3>
-                  <p className="text-sm text-gray-600">犠牲ではなく調和による成功</p>
+              <div className="inline-block bg-gradient-to-r from-red-100 to-pink-100 rounded-full px-6 py-3 border-2 border-red-300">
+                <span className="text-red-700 font-bold">⚡ 今だけ完全無料で公開中 ⚡</span>
+              </div>
+            </div>
+
+            {/* 4つの核心価値 */}
+            <div className="grid md:grid-cols-2 gap-8 mb-16">
+              
+              <div className={`bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl p-8 border-2 border-orange-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`}>
+                <div className="text-center">
+                  <div className="text-5xl mb-4">🌟</div>
+                  <h3 className="text-2xl font-bold text-orange-800 mb-4">
+                    あなたの「偽物感」が<br/>特別な証である理由
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    ＨＩＲＯの体験談と最新の心理学研究から明かされる、なぜ優秀な人ほど偽物感を感じるのかの真実
+                  </p>
+                  <div className="bg-white/80 rounded-xl p-4 border border-orange-200">
+                    <p className="text-orange-700 font-bold text-sm">✨ Day1で体験できます</p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-300">
-                <p className="text-xl font-bold text-orange-800 mb-2">
-                  すべてを完全無料で公開します！
-                </p>
-                <p className="text-gray-600">
-                  今だけの特別なご案内です
+
+              <div className={`bg-gradient-to-br from-pink-50 to-red-50 rounded-3xl p-8 border-2 border-pink-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`} style={{ transitionDelay: '200ms' }}>
+                <div className="text-center">
+                  <div className="text-5xl mb-4">💖</div>
+                  <h3 className="text-2xl font-bold text-pink-800 mb-4">
+                    自分を楽しんで<br/>人生を上手くいかせる秘密
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    「頑張る」から「楽しむ」へのパラダイムシフト。楽しさと成功の科学的関係性を解明
+                  </p>
+                  <div className="bg-white/80 rounded-xl p-4 border border-pink-200">
+                    <p className="text-pink-700 font-bold text-sm">✨ Day2で体験できます</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`} style={{ transitionDelay: '400ms' }}>
+                <div className="text-center">
+                  <div className="text-5xl mb-4">✨</div>
+                  <h3 className="text-2xl font-bold text-purple-800 mb-4">
+                    実践ワークで効果が<br/>持続する本当の仕組み
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    三位一体統合の7分間ワーク。頭ではなく身体で感じる変化が長続きする理由
+                  </p>
+                  <div className="bg-white/80 rounded-xl p-4 border border-purple-200">
+                    <p className="text-purple-700 font-bold text-sm">✨ Day3-4で体験できます</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`bg-gradient-to-br from-green-50 to-teal-50 rounded-3xl p-8 border-2 border-green-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`} style={{ transitionDelay: '600ms' }}>
+                <div className="text-center">
+                  <div className="text-5xl mb-4">🚀</div>
+                  <h3 className="text-2xl font-bold text-green-800 mb-4">
+                    満たされながら成功する<br/>新しい生き方
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    犠牲ではなく調和による成功法則。自分らしさを保ちながら結果を出し続ける方法
+                  </p>
+                  <div className="bg-white/80 rounded-xl p-4 border border-green-200">
+                    <p className="text-green-700 font-bold text-sm">✨ Day5で体験できます</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 価値の強調 */}
+            <div className="text-center">
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-3xl p-10 border-2 border-orange-300 shadow-xl">
+                <h3 className="text-3xl font-bold text-orange-800 mb-6">
+                  🎁 これら全てを完全無料で公開します！
+                </h3>
+                <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                  通常であれば個別セッション5回分（50万円相当）の内容を<br/>
+                  <strong className="text-orange-700">今回限り、特別に無料</strong>でお届けします
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 慈愛深い最終メッセージ */}
-        <div className="py-16 px-6 bg-gradient-to-br from-purple-50 to-blue-50">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg">
-              <h2 className="text-2xl font-light text-center text-gray-800 mb-8">
-                最後に、お伝えしたいこと
-              </h2>
+        {/* 最終メッセージ（感動のクライマックス） */}
+        <div 
+          id="final-message-section"
+          data-animate="true"
+          className="py-20 px-6 bg-gradient-to-br from-slate-900 via-purple-900 to-blue-900 text-white relative overflow-hidden"
+        >
+          {/* 背景エフェクト */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-10 right-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-10 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          </div>
+
+          <div className="max-w-4xl mx-auto relative">
+            <div className={`bg-white/10 backdrop-blur-xl rounded-3xl p-12 md:p-16 shadow-2xl border border-white/20 transform transition-all duration-1000 ${
+              isVisible['final-message-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+            }`}>
               
-              <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
-                <p>
-                  私は15年間、多くの方と一緒にこの道を歩いてきました。
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-5xl font-light mb-8 leading-tight">
+                  最後に、あなたにお伝えしたい<br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 font-bold">たった一つのこと</span>
+                </h2>
+              </div>
+              
+              <div className="space-y-8 text-lg md:text-xl leading-relaxed">
+                <p className="text-gray-200">
+                  私は15年間、数千人の方と一緒にこの道を歩いてきました。
                 </p>
                 
-                <p>
+                <p className="text-gray-200">
                   その中で、確信していることがあります。
                 </p>
                 
-                <p className="text-xl text-purple-700 font-medium text-center">
-                  変化は、静かに訪れるということ。
-                </p>
-                
-                <p>
-                  劇的な変化をお約束することはできません。<br/>
-                  でも、確実に何かが変わり始めます。
-                </p>
-                
-                <div className="bg-purple-50 rounded-xl p-6 my-8">
-                  <p className="text-center">
-                    朝、鏡を見た時の感覚。<br/>
-                    人と話している時の呼吸。<br/>
-                    夜、眠りにつく前の心地よさ。
+                <div className="text-center bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl p-8 border border-purple-300/30">
+                  <p className="text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 font-bold mb-4">
+                    変化は、静かに訪れるということ。
                   </p>
                 </div>
                 
-                <p>
+                <p className="text-gray-200">
+                  劇的な変化をお約束することはできません。<br/>
+                  でも、<strong className="text-white">確実に何かが変わり始めます</strong>。
+                </p>
+                
+                <div className="bg-purple-900/50 rounded-2xl p-8 border border-purple-400/30">
+                  <div className="text-center space-y-3 text-lg">
+                    <p className="text-purple-200">朝、鏡を見た時の感覚。</p>
+                    <p className="text-blue-200">人と話している時の呼吸。</p>
+                    <p className="text-green-200">夜、眠りにつく前の心地よさ。</p>
+                  </div>
+                </div>
+                
+                <p className="text-gray-200">
                   そんな小さな変化の積み重ねが、<br/>
-                  いつの間にか、大きな変容になっていく。
+                  いつの間にか、<strong className="text-white">大きな変容</strong>になっていく。
                 </p>
                 
-                <p className="text-center">
-                  変わりたいという気持ちは、<br/>
-                  時間とともに日常に埋もれていきがちです。
-                </p>
+                <div className="text-center bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl p-8 border border-orange-300/30">
+                  <p className="text-gray-200">
+                    変わりたいという気持ちは、<br/>
+                    時間とともに日常に埋もれていきがちです。
+                  </p>
+                </div>
                 
-                <p className="text-xl text-purple-700 font-medium text-center">
-                  だから、もし少しでも興味があるなら<br/>
-                  今、このタイミングを大切にしてください。
-                </p>
-                
-                <p className="text-2xl font-light text-center text-gray-800 mt-8">
-                  一緒に、歩いてみませんか？
-                </p>
+                <div className="text-center">
+                  <p className="text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 font-bold mb-6">
+                    だから、もし少しでも興味があるなら<br/>
+                    今、このタイミングを大切にしてください。
+                  </p>
+                  
+                  <p className="text-3xl md:text-4xl font-light text-white mt-8">
+                    一緒に、歩いてみませんか？
+                  </p>
+                </div>
               </div>
               
-              <div className="text-right text-purple-500 italic text-lg mt-8">
-                ＨＩＲＯ
+              <div className="text-right mt-12">
+                <p className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 italic font-light">
+                  魂感自在 ＨＩＲＯ
+                </p>
               </div>
             </div>
           </div>
@@ -782,15 +1023,27 @@ const FreeTrialAssessment = () => {
         
         {/* フッター */}
         <div className="py-8 px-6 bg-gray-50 text-center">
-          <p className="text-gray-500 text-sm">
-            Copyright(c) 2025 魂感自在 All Rights Reserved.
-          </p>
+          <div className="text-gray-500 text-sm space-y-2">
+            <p>
+              <a 
+                href="https://konkanjizai.com/privacy-policy/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-gray-700 transition-colors underline"
+              >
+                プライバシーポリシー
+              </a>
+            </p>
+            <p>
+              Copyright(c) 2025 魂感自在 All Rights Reserved.
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
-  // 診断質問画面（既存のまま）
+  // 診断質問画面（変更禁止）
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
       <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full">
