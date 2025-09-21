@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { Heart, Users, BookOpen } from 'lucide-react';
-// ✅ 修正: trackConversion を import から削除
+// ✅ 修正: trackConversion を import から削除、lucide-reactも削除
 import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
 const FreeTrialAssessment = () => {
@@ -289,7 +288,7 @@ const FreeTrialAssessment = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-8 shadow-xl">
-                <BookOpen className="w-8 h-8 text-blue-500" />
+                <span className="text-2xl">📖</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-light text-gray-800 mb-8">
                 この感覚には、名前があります
@@ -548,8 +547,8 @@ const FreeTrialAssessment = () => {
         <div className="py-20 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
-              <Users className="w-16 h-16 mx-auto mb-8 text-blue-500" />
-              <h2 className="text-4xl md:text-5xl font-light text-gray-800 mb-8">
+              <span className="text-4xl">👥</span>
+              <h2 className="text-4xl md:text-5xl font-light text-gray-800 mb-8 mt-6">
                 奇跡は本当に起きています
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed">
