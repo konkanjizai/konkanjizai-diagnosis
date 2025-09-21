@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { Heart, Users, BookOpen } from 'lucide-react';
 // ✅ 修正: trackConversion を import から削除
 import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
@@ -8,7 +7,6 @@ const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
-  const [isVisible, setIsVisible] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
@@ -20,26 +18,6 @@ const FreeTrialAssessment = () => {
   // Google広告・GTM初期化（新しいバージョン）
   useEffect(() => {
     initGoogleAdsTag();
-  }, []);
-
-  // 穏やかなアニメーション制御
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.id;
-            setIsVisible(prev => ({ ...prev, [id]: true }));
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    const sections = document.querySelectorAll('[data-animate="true"]');
-    sections.forEach(section => observer.observe(section));
-
-    return () => observer.disconnect();
   }, []);
 
   const handleEmailRegistration = () => {
@@ -208,7 +186,7 @@ const FreeTrialAssessment = () => {
 
   const preResult = Object.keys(responses).length === 5 ? analyzePreResult() : null;
 
-  // 静かで温かい診断結果表示画面
+  // ✅ 新しい診断結果表示画面（HIRO統合ワークデザイン）
   if (showPreResult && preResult) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
@@ -234,7 +212,7 @@ const FreeTrialAssessment = () => {
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 md:p-12 shadow-lg mb-8">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-6 shadow-md">
-                  <Heart className="w-8 h-8 text-purple-500" />
+                  <span className="text-3xl">💖</span>
                 </div>
                 
                 <h2 className="text-2xl md:text-3xl font-light text-gray-800 mb-6">
@@ -287,7 +265,7 @@ const FreeTrialAssessment = () => {
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-6 shadow-md">
-                <BookOpen className="w-6 h-6 text-blue-500" />
+                <span className="text-2xl">📖</span>
               </div>
               <h2 className="text-3xl font-light text-gray-800 mb-6">
                 あなたの感じていること
@@ -443,12 +421,12 @@ const FreeTrialAssessment = () => {
           </div>
         </div>
         
-        {/* ＨＩＲＯからの心温まる招待 */}
+        {/* HIROからの心温まる招待 */}
         <div className="py-16 px-6 bg-white">
           <div className="max-w-3xl mx-auto">
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 md:p-12 shadow-lg">
               
-              {/* ＨＩＲＯの温かい自己紹介 */}
+              {/* HIROの温かい自己紹介 */}
               <div className="text-center mb-8">
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
                   <span className="text-2xl">🤲</span>
@@ -494,7 +472,7 @@ const FreeTrialAssessment = () => {
                 </p>
               </div>
               
-              {/* 希望への道筋を示すセクション - マエストロ版 */}
+              {/* 希望への道筋を示すセクション */}
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-8 my-8 border-l-4 border-orange-300">
                 <h4 className="text-2xl font-medium text-orange-800 mb-6 text-center">
                   なぜ、これまでの方法では変われなかったのか？
@@ -542,8 +520,8 @@ const FreeTrialAssessment = () => {
         <div className="py-16 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
-              <Users className="w-12 h-12 mx-auto mb-6 text-blue-500" />
-              <h2 className="text-3xl font-light text-gray-800 mb-6">
+              <span className="text-4xl">👥</span>
+              <h2 className="text-3xl font-light text-gray-800 mb-6 mt-6">
                 同じ道を歩いた方々の声
               </h2>
               <p className="text-lg text-gray-600">
