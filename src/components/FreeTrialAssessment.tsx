@@ -288,7 +288,7 @@ const FreeTrialAssessment = () => {
     }
   ];
 
-  // ✅ 新しい診断結果表示画面（バージョン13）
+  // ✅ バージョン13診断結果表示画面
   if (showPreResult && preResult) {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
@@ -395,6 +395,7 @@ const FreeTrialAssessment = () => {
                     </h4>
                     <p className="text-gray-700 leading-relaxed text-lg">
                       {preResult.currentState}
+                      セラピストとして、専門家として、そして一人の人間として...すべての役割で成果を出しているのに、心の奥で<strong className="text-blue-700">「本当の私はどこにいるの？」</strong>という声が聞こえているのではないでしょうか。
                     </p>
                   </div>
 
@@ -1115,7 +1116,7 @@ const FreeTrialAssessment = () => {
     );
   }
 
-  // 診断質問画面（既存のまま変更禁止）
+  // 診断質問画面（絶対変更禁止・元のナレッジファイルと同一）
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
       <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full">
