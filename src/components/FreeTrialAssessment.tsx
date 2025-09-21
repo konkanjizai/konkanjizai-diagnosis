@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
+import { Heart, Users, BookOpen } from 'lucide-react';
 // ✅ 修正: trackConversion を import から削除
 import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
@@ -186,73 +187,96 @@ const FreeTrialAssessment = () => {
 
   const preResult = Object.keys(responses).length === 5 ? analyzePreResult() : null;
 
-  // ✅ 新しい診断結果表示画面（HIRO統合ワークデザイン）
+  // ✅ 新しい診断結果表示画面（修正版デザイン適用）
   if (showPreResult && preResult) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
         
         {/* 静かで温かい診断結果表示 */}
-        <div className="py-16 px-6 bg-white">
-          <div className="max-w-3xl mx-auto">
+        <div className="py-20 px-6 bg-gradient-to-br from-white via-purple-50 to-blue-50 relative overflow-hidden">
+          {/* 背景装飾 */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="max-w-4xl mx-auto relative">
             
-            {/* 優しい診断完了の確認 */}
-            <div className="text-center mb-12">
-              <div className="inline-block bg-purple-50 rounded-full px-6 py-3 mb-6 border border-purple-100">
-                <span className="text-purple-700 font-medium">あなたの心の声が聞こえました</span>
+            {/* 感動的な導入 */}
+            <div className="text-center mb-16">
+              <div className="inline-block bg-white/60 backdrop-blur-sm rounded-full px-8 py-4 mb-8 border border-white/40 shadow-lg">
+                <span className="text-purple-700 font-medium text-lg">✨ あなたの心の扉が開かれました ✨</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-light text-gray-800 mb-6 leading-relaxed">
-                診断結果をお伝えします
+              <h1 className="text-4xl md:text-6xl font-light text-gray-800 mb-8 leading-tight">
+                ついに見つかりました
               </h1>
-              <p className="text-lg text-gray-600">
-                5つの質問から見えてきた、あなたの心の状態
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+                あなたが探し続けていた<br/>
+                <strong className="text-purple-700">本当の答え</strong>がここにあります
               </p>
             </div>
 
-            {/* 診断結果 - 温かい共感重視 */}
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 md:p-12 shadow-lg mb-8">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-6 shadow-md">
-                  <span className="text-3xl">💖</span>
+            {/* 診断結果（ドラマティック表示） */}
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-10 md:p-16 shadow-2xl mb-12 border border-white/50 relative overflow-hidden">
+              {/* 光の演出 */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5"></div>
+              
+              <div className="text-center relative">
+                <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full mb-8 shadow-lg relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full animate-pulse"></div>
+                  <span className="text-6xl">{preResult.icon}</span>
                 </div>
                 
-                <h2 className="text-2xl md:text-3xl font-light text-gray-800 mb-6">
-                  あなたのタイプ
+                <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-8">
+                  あなたのタイプが判明しました
                 </h2>
                 
-                <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-                  <div className="text-5xl mb-4">{preResult.icon}</div>
-                  <h3 className="text-xl md:text-2xl font-medium text-purple-700 mb-4">
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 mb-8 shadow-inner border border-purple-100">
+                  <h3 className="text-2xl md:text-3xl font-bold text-purple-700 mb-6 leading-relaxed">
                     {preResult.type}
                   </h3>
+                  
+                  <div className="bg-white/80 rounded-2xl p-6 shadow-sm">
+                    <p className="text-purple-600 font-medium text-lg mb-2">🎯 これはとても特別なことです</p>
+                    <p className="text-gray-700 leading-relaxed">
+                      このタイプは、あなたが<strong className="text-purple-700">高い感受性と深い洞察力</strong>を持っていることを示しています。
+                      実は、最も成功している人ほど、このような感覚を持っているのです。
+                    </p>
+                  </div>
                 </div>
 
-                {/* 深い共感メッセージ */}
+                {/* 深い共感メッセージ（段階的表示） */}
                 <div className="text-left space-y-6">
-                  <div className="bg-blue-50 border-l-4 border-blue-300 p-6 rounded-r-lg">
-                    <h4 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
-                      <span>💙</span> 今のあなたの気持ち
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-l-6 border-blue-400 p-8 rounded-r-2xl shadow-lg">
+                    <h4 className="font-bold text-blue-800 mb-4 flex items-center gap-3 text-lg">
+                      <span className="text-2xl">💙</span> 今、あなたの心で起きていること
                     </h4>
-                    <p className="text-gray-700 leading-relaxed text-base">
+                    <p className="text-gray-700 leading-relaxed text-lg">
                       {preResult.currentState}
                     </p>
                   </div>
 
-                  <div className="bg-green-50 border-l-4 border-green-300 p-6 rounded-r-lg">
-                    <h4 className="font-medium text-green-800 mb-3 flex items-center gap-2">
-                      <span>🌱</span> あなたが本当に求めているもの
+                  <div className="bg-gradient-to-r from-emerald-50 to-green-50 border-l-6 border-emerald-400 p-8 rounded-r-2xl shadow-lg">
+                    <h4 className="font-bold text-emerald-800 mb-4 flex items-center gap-3 text-lg">
+                      <span className="text-2xl">🌱</span> あなたの魂が本当に求めているもの
                     </h4>
-                    <p className="text-gray-700 leading-relaxed text-base">
+                    <p className="text-gray-700 leading-relaxed text-lg">
                       {preResult.desire}
                     </p>
                   </div>
 
-                  <div className="bg-yellow-50 border-l-4 border-yellow-300 p-6 rounded-r-lg">
-                    <h4 className="font-medium text-yellow-800 mb-3 flex items-center gap-2">
-                      <span>✨</span> でも、大丈夫です
+                  <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-6 border-amber-400 p-8 rounded-r-2xl shadow-lg">
+                    <h4 className="font-bold text-amber-800 mb-4 flex items-center gap-3 text-lg">
+                      <span className="text-2xl">✨</span> でも、今日がその終わりの始まりです
                     </h4>
-                    <p className="text-gray-700 leading-relaxed text-base">
+                    <p className="text-gray-700 leading-relaxed text-lg mb-4">
                       {preResult.hope}
                     </p>
+                    <div className="bg-white/80 rounded-xl p-4 border border-amber-200">
+                      <p className="text-amber-700 font-semibold text-center">
+                        🌟 そして私も、15年前までは、あなたと全く同じ苦しみの中にいました 🌟
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -260,297 +284,323 @@ const FreeTrialAssessment = () => {
           </div>
         </div>
 
-        {/* インポスター症候群の優しい説明 */}
-        <div className="py-16 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-6 shadow-md">
-                <span className="text-2xl">📖</span>
+        {/* インポスター症候群の権威的説明 */}
+        <div className="py-20 px-6 bg-gradient-to-br from-slate-50 to-blue-50">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-8 shadow-xl">
+                <BookOpen className="w-8 h-8 text-blue-500" />
               </div>
-              <h2 className="text-3xl font-light text-gray-800 mb-6">
-                あなたの感じていること
+              <h2 className="text-4xl md:text-5xl font-light text-gray-800 mb-8">
+                この感覚には、名前があります
               </h2>
-              <p className="text-lg text-gray-600">
-                実は、名前があります
+              <p className="text-xl text-gray-600">
+                そして、それはあなたが特別な存在である証なのです
               </p>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg mb-8">
-              <div className="text-center mb-8">
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6">
-                  <h3 className="text-2xl font-medium text-gray-800 mb-3">
+            <div className="bg-white rounded-3xl p-10 md:p-16 shadow-2xl mb-12">
+              
+              <div className="text-center mb-12">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 mb-8 border border-blue-100">
+                  <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
                     インポスター症候群
                   </h3>
-                  <p className="text-gray-600 italic">成功者が感じる心の状態</p>
+                  <p className="text-xl text-gray-600 italic mb-6">Imposter Syndrome</p>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    外面的には成功していても、内面では「自分は偽物かもしれない」「いつか化けの皮が剥がれるのでは」という不安を抱える心理状態
+                  </p>
                 </div>
                 
-                <div className="text-left space-y-6">
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    外面的には成功していても、内面では「自分は偽物かもしれない」「いつか化けの皮が剥がれるのでは」という不安を抱える心理状態です。
-                  </p>
+                {/* 驚きの事実 */}
+                <div className="grid md:grid-cols-2 gap-8 mb-10">
+                  <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl p-8 border border-red-200">
+                    <div className="text-4xl font-bold text-red-600 mb-3">70%</div>
+                    <p className="text-gray-700 font-medium">成功者がこの感覚を経験</p>
+                    <p className="text-sm text-gray-600 mt-2">ハーバード大学研究より</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 border border-purple-200">
+                    <div className="text-4xl font-bold text-purple-600 mb-3">↗️</div>
+                    <p className="text-gray-700 font-medium">能力が高いほど強く感じる</p>
+                    <p className="text-sm text-gray-600 mt-2">パラドックス現象</p>
+                  </div>
                 </div>
               </div>
 
-              {/* 特徴の優しい説明 */}
-              <div className="space-y-4">
-                <h4 className="text-lg font-medium text-gray-800 mb-4">こんな気持ちはありませんか？</h4>
+              {/* 著名人の告白（より感動的に） */}
+              <div className="bg-gray-50 rounded-2xl p-8 mb-10">
+                <h4 className="text-2xl font-bold text-gray-800 mb-8 text-center">
+                  🌟 世界的な成功者たちもあなたと同じ感覚を味わっています 🌟
+                </h4>
                 
-                <div className="grid gap-3">
+                <div className="space-y-8">
                   {[
-                    "「いつか本当の自分がバレてしまう」という恐怖",
-                    "成功を「運が良かっただけ」と感じてしまう",
-                    "褒められても素直に受け取れない",
-                    "自分の能力を過小評価してしまう",
-                    "完璧でないと不安になる",
-                    "他の人と比較して劣っていると感じる"
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-shrink-0 w-2 h-2 bg-purple-300 rounded-full mt-3"></div>
-                      <p className="text-gray-700 text-base">{feature}</p>
+                    {
+                      name: "マヤ・アンジェロウ",
+                      role: "詩人・作家（クリントン大統領就任式で朗読）",
+                      quote: "「今度こそ気づかれてしまう。私がみんなを騙していたことを。本当の私がどの程度の人間なのか、見つけてしまうことになるだろう」",
+                      achievement: "7つの名誉博士号、50以上の栄誉を受賞"
+                    },
+                    {
+                      name: "エマ・ワトソン",
+                      role: "女優・国連親善大使",
+                      quote: "「自分がいい仕事をすればするほど、『私はそんなに褒められる資格なんてない』という気持ちが大きくなっていく」",
+                      achievement: "ハリーポッター主演、国連でのスピーチ"
+                    },
+                    {
+                      name: "山中伸弥教授",
+                      role: "京都大学教授・ノーベル賞受賞者",
+                      quote: "自らの研究が「本当に価値があるのか」と常に疑問を持ち続けていた",
+                      achievement: "iPS細胞の開発でノーベル生理学・医学賞"
+                    }
+                  ].map((person, index) => (
+                    <div key={index} className="border-l-4 border-purple-400 pl-6 bg-white p-6 rounded-r-2xl shadow-sm">
+                      <div className="mb-4">
+                        <h5 className="font-bold text-gray-800 text-xl mb-1">{person.name}</h5>
+                        <p className="text-purple-600 font-medium mb-1">{person.role}</p>
+                        <p className="text-sm text-gray-500 italic">{person.achievement}</p>
+                      </div>
+                      <blockquote className="text-gray-700 leading-relaxed border-l-2 border-gray-200 pl-4 italic">
+                        "{person.quote}"
+                      </blockquote>
                     </div>
                   ))}
                 </div>
                 
-                {/* インポスター症候群の事実 */}
-                <div className="mt-8">
-                  <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                    実はこの現象は特に<strong className="text-purple-700">高い能力を持つ人々</strong>に多く見られます
+                <div className="text-center mt-8 p-6 bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl">
+                  <p className="text-lg font-bold text-purple-700">
+                    つまり、この感覚こそ、あなたが「特別である証拠」なのです
                   </p>
-                  
-                  <div className="bg-purple-50 rounded-xl p-4">
-                    <h4 className="text-lg font-medium text-purple-800 mb-3">驚くべき事実</h4>
-                    <div className="space-y-2 text-gray-700 text-base">
-                      <p>• 成功者の約<strong className="text-purple-700">70%</strong>がインポスター症候群を経験しています</p>
-                      <p>• 能力が高い人ほどこの感覚を強く感じやすい</p>
-                      <p>• 成功が増えるほど、偽物感が強まる傾向があります</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* 有名人の告白 */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h4 className="text-lg font-medium text-gray-800 mb-6 text-center">有名人の告白</h4>
-              
-              <div className="space-y-6">
-                {[
-                  {
-                    name: "マヤ・アンジェロウ",
-                    role: "詩人・作家・歌手・女優・公民権運動活動家",
-                    work: "1993年ビル・クリントン大統領就任式で自作詩朗読",
-                    quote: "「今度こそ気づかれてしまう。私がみんなを騙していたことを。本当の私がどの程度の人間なのか、見つけてしまうことになるだろう」"
-                  },
-                  {
-                    name: "エマ・ワトソン",
-                    role: "女優・国連UN Women親善大使・人権活動家",
-                    work: "ハリーポッターのハーマイオニー",
-                    quote: "「自分がいい仕事をすればするほど、『私はそんなに褒められる資格なんてない』という気持ちが大きくなっていく」"
-                  },
-                  {
-                    name: "山中伸弥教授",
-                    role: "京都大学iPS細胞研究所 名誉所長・教授・医学博士",
-                    work: "iPS細胞の開発・ノーベル生理学・医学賞受賞",
-                    quote: "自らの研究が「本当に価値があるのか」と疑問を持っていたと告白"
-                  }
-                ].map((person, index) => (
-                  <div key={index} className="border-l-4 border-purple-200 pl-4 bg-gray-50 p-4 rounded-r-lg">
-                    <div className="mb-2">
-                      <h5 className="font-semibold text-gray-800 text-xl">{person.name}</h5>
-                      <p className="text-purple-600 text-base font-medium">{person.role}</p>
-                      <p className="text-gray-600 text-base italic">{person.work}</p>
-                    </div>
-                    <p className="text-gray-700 text-base leading-relaxed">{person.quote}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* 1回目オファー */}
-        <div className="py-12 px-6 bg-gray-25">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 md:p-12 shadow-lg">
-              
-              {/* メインタイトル */}
-              <div className="text-center mb-8">
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                  ジシン覚醒
-                </h2>
-                <h3 className="text-3xl md:text-4xl font-bold text-orange-500 mb-8">
-                  5Days Video<br/>
-                  プログラム
-                </h3>
-                
-                <div className="space-y-6 text-lg md:text-xl font-bold text-gray-700 leading-relaxed">
-                  <p>「偽物感」はあなたが特別な証！</p>
-                  <p>自分を楽しめば人生は上手くいく！</p>
-                  <p className="text-orange-500">実践ワーク中心だから<br/>効果が持続する！</p>
-                  <p>満たされながら成功して<br/>生きていく方法を<br/>完全無料で公開します！</p>
-                </div>
-              </div>
-              
-              {/* CTA ボタン */}
-              <div className="text-center">
-                <button
-                  onClick={handleEmailRegistration}
-                  disabled={isSubmitting}
-                  className="inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                  style={{
-                    background: 'linear-gradient(135deg, #f97316 0%, #ec4899 100%)',
-                    minWidth: '300px'
-                  }}
-                >
-                  {isSubmitting ? (
-                    '準備しています...'
-                  ) : (
-                    <>
-                      <span className="mr-2">🌟</span>
-                      今すぐ無料で受け取る！
-                      <span className="ml-2">→</span>
-                    </>
-                  )}
-                </button>
-                
-                <p className="mt-6 text-gray-500 text-base">
-                  あなたの直感を、信じてあげてください
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* HIROからの心温まる招待 */}
+        {/* 1回目オファー（超自然） */}
         <div className="py-16 px-6 bg-white">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 md:p-12 shadow-lg">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 shadow-lg">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">
+                🤔 もしかして、こんな疑問が湧いていませんか？
+              </h3>
               
-              {/* HIROの温かい自己紹介 */}
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
-                  <span className="text-2xl">🤲</span>
+              <div className="text-left space-y-4 mb-8">
+                <div className="flex items-start gap-3">
+                  <span className="text-purple-500 mt-1">💭</span>
+                  <p className="text-gray-700">「でも、どうやってこの感覚から解放されるの？」</p>
                 </div>
-                <h2 className="text-2xl font-light text-gray-800 mb-6">
-                  初めまして。<br/>
-                  自己認識と覚醒の専門家、<br/>
-                  魂感自在ＨＩＲＯと申します。
-                </h2>
+                <div className="flex items-start gap-3">
+                  <span className="text-purple-500 mt-1">💭</span>
+                  <p className="text-gray-700">「本当に変われるの？今までも色々試したけど...」</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-purple-500 mt-1">💭</span>
+                  <p className="text-gray-700">「自分らしく生きるって、具体的にはどういうこと？」</p>
+                </div>
               </div>
               
-              <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
-                <p>
-                  実は私も、あなたと全く同じ苦しみを味わってきました。大手企業で「間違うこと自体が許されない」環境にいた頃、毎日「今日こそバレる日かもしれない」という恐怖と共に出勤していました。誰にも相談できない孤独感と、「何かが足りない」という虚無感に苦しんでいました。
-                </p>
-                
-                <p>
-                  そんな絶望的な状況の中で、15年前に運命の出会いから「三位一体統合」という新しい視点を発見しました。私たちの中には魂・精神・肉体という三つの自分が存在し、そのバラバラな状態がインポスター症候群の正体だったのです。
-                </p>
-                
-                <p>
-                  あなたが感じている「もう演じるのに疲れた」という気持ちの正体を、私は知っています。この15年間で5,000人以上の方々をサポートしてきた経験から、「演じる自分」から「本来の自分」へと戻る道筋をお伝えできます。
-                </p>
-                
-                <p>
-                  私の夢は、一人ひとりが本来の自分らしさで生きられる世界を創ることです。
-                </p>
-                
-                <p className="font-medium text-purple-700">
-                  そのためには、まずあなたが「演じる自分」から解放されて、心から安心できる毎日を手に入れることが大切だと思うのです。
-                </p>
-                
-                <p className="font-medium text-purple-700">
-                  あなたが本来の自分で輝けば、きっとその光は周りの人たちにも伝わっていく。そんな小さな変化の輪が、やがて大きな世界の変化につながると信じています。
-                </p>
-                
-                <p className="font-medium text-purple-700">
-                  だからこそ、これから5日間で、その第一歩を一緒に歩んでみませんか？
-                </p>
-                
-                <p className="font-medium text-purple-700">
-                  急がなくて大丈夫です。あなたのペースで、ゆっくりと。
-                </p>
-              </div>
+              <p className="text-xl text-gray-600 mb-6 leading-relaxed">
+                実は、その答えを知っている人がいます。<br/>
+                同じ道を歩き、そして見つけた人が...
+              </p>
               
-              {/* 希望への道筋を示すセクション */}
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-8 my-8 border-l-4 border-orange-300">
-                <h4 className="text-2xl font-medium text-orange-800 mb-6 text-center">
-                  なぜ、これまでの方法では変われなかったのか？
-                </h4>
+              <div className="inline-block bg-gradient-to-r from-orange-100 to-pink-100 rounded-full px-8 py-3 border border-orange-200">
+                <span className="text-orange-700 font-medium">
+                  ✨ その人の話を、少し聞いてみませんか？ ✨
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* 最高レベルのＨＩＲＯストーリー */}
+        <div className="py-20 px-6 bg-gradient-to-br from-slate-900 via-purple-900 to-blue-900 text-white relative overflow-hidden">
+          {/* 背景エフェクト */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-20 right-20 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-20 left-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          </div>
+          
+          <div className="max-w-4xl mx-auto relative">
+            
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-white/10 backdrop-blur-sm rounded-full mb-8 shadow-xl">
+                <span className="text-4xl">🤲</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-light mb-8 leading-tight">
+                同じ絶望を味わった男の<br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 font-bold">奇跡の発見</span>
+              </h2>
+              <p className="text-xl text-gray-300">
+                自己認識と覚醒の専門家<br/>
+                <strong className="text-white text-2xl">魂感自在 ＨＩＲＯ</strong>
+              </p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-10 md:p-16 shadow-2xl border border-white/20">
+              
+              <div className="space-y-8 text-lg leading-relaxed">
                 
-                <div className="space-y-6 text-lg text-gray-700">
-                  <div className="bg-white rounded-lg p-6 shadow-sm">
-                    <div className="space-y-3 text-base">
-                      <p>• <strong>頭だけのアプローチ</strong>：理解しても、なぜか変われない</p>
-                      <p>• <strong>感情だけの癒し</strong>：一時的で、また元の状態に戻ってしまう</p>
-                      <p>• <strong>意志力だけの変化</strong>：無理をして、さらに疲弊してしまう</p>
+                {/* 苦悩の時代 */}
+                <div className="border-l-4 border-red-400 pl-8 bg-red-900/20 p-6 rounded-r-2xl">
+                  <h3 className="text-2xl font-bold text-red-300 mb-4">🌑 絶望の日々</h3>
+                  <p className="text-gray-200">
+                    実は私も、あなたと全く同じ苦しみを味わってきました。大手企業で「間違うこと自体が許されない」環境にいた頃、毎日<strong className="text-red-300">「今日こそバレる日かもしれない」</strong>という恐怖と共に出勤していました。
+                  </p>
+                  <p className="text-gray-200 mt-4">
+                    誰にも相談できない孤独感と、「何かが足りない」という虚無感。電車の中で、ふと<strong className="text-red-300">「このまま消えてしまいたい」</strong>と思う日もありました。
+                  </p>
+                </div>
+
+                {/* 転換点 */}
+                <div className="border-l-4 border-yellow-400 pl-8 bg-yellow-900/20 p-6 rounded-r-2xl">
+                  <h3 className="text-2xl font-bold text-yellow-300 mb-4">⚡ 運命の転換点</h3>
+                  <p className="text-gray-200">
+                    でも今になって分かります。<br/>
+                    <strong className="text-yellow-300 text-xl">あの時の「偽物感」こそが、私の特別な証だったのです。</strong>
+                  </p>
+                  <p className="text-gray-200 mt-4">
+                    そんな絶望的な状況の中で、15年前に運命の出会いから「三位一体統合」という新しい視点を発見しました。私たちの中には<strong className="text-yellow-300">魂・精神・肉体という三つの自分</strong>が存在し、そのバラバラな状態がインポスター症候群の正体だったのです。
+                  </p>
+                </div>
+
+                {/* 最重要発見 */}
+                <div className="border-l-4 border-green-400 pl-8 bg-green-900/20 p-6 rounded-r-2xl">
+                  <h3 className="text-2xl font-bold text-green-300 mb-4">💚 人生を変えた発見</h3>
+                  <p className="text-gray-200">
+                    そして何より大切な発見は、<br/>
+                    <strong className="text-green-300 text-xl">「自分を楽しめるようになると、人生は面白いほど上手くいく」</strong><br/>
+                    ということでした。
+                  </p>
+                  <p className="text-gray-200 mt-4">
+                    演技をやめ、仮面を外し、本来の自分で生きるようになったとき...収入は数倍になり、人間関係は劇的に改善し、何より<strong className="text-green-300">毎朝鏡を見るのが楽しみ</strong>になったのです。
+                  </p>
+                </div>
+
+                {/* 使命の発見 */}
+                <div className="border-l-4 border-purple-400 pl-8 bg-purple-900/20 p-6 rounded-r-2xl">
+                  <h3 className="text-2xl font-bold text-purple-300 mb-4">🌟 新たな使命</h3>
+                  <p className="text-gray-200">
+                    {preResult.type}が感じている、心にポッカリ空いた穴の正体を、私は知っています。この15年間で<strong className="text-purple-300">5,000人以上の方々</strong>をサポートしてきた経験から、<strong className="text-purple-300">実践的なワークを通じて「演じる自分」から「本来の自分」へと戻る道筋</strong>をお伝えできます。
+                  </p>
+                  
+                  <div className="bg-white/10 rounded-xl p-6 mt-6 border border-purple-300/30">
+                    <p className="text-purple-200 font-semibold text-center text-lg">
+                      頭で理解するだけでなく、身体で感じ、心で納得できる方法だからこそ、<br/>
+                      <strong className="text-purple-100">変化が長続きする</strong>のです。
+                    </p>
+                  </div>
+                </div>
+
+                {/* 壮大な使命 */}
+                <div className="text-center bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-2xl p-8 border border-white/20">
+                  <p className="text-xl leading-relaxed mb-6">
+                    私の夢は、一人ひとりが<br/>
+                    <strong className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 text-2xl">満たされながら成功し、自分らしさを楽しんで</strong><br/>
+                    生きられる世界を創ることです。
+                  </p>
+                  
+                  <div className="space-y-4 text-lg">
+                    <p className="text-purple-200 font-medium">
+                      そのためには、まずあなたが「演じる自分」から解放されて、心から安心できる毎日を手に入れることが大切だと思うのです。
+                    </p>
+                    
+                    <p className="text-blue-200 font-medium">
+                      あなたが本来の自分で輝けば、きっとその光は周りの人たちにも伝わっていく。そんな小さな変化の輪が、やがて大きな世界の変化につながると信じています。
+                    </p>
+                    
+                    <div className="bg-gradient-to-r from-orange-500/20 to-pink-500/20 rounded-xl p-6 mt-8 border border-orange-300/30">
+                      <p className="text-orange-200 font-bold text-xl">
+                        だからこそ、これから5日間で、その第一歩を一緒に歩んでみませんか？
+                      </p>
+                      <p className="text-orange-100 mt-2">
+                        急がなくて大丈夫です。あなたのペースで、ゆっくりと。
+                      </p>
                     </div>
                   </div>
-                  
-                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 text-center">
-                    <p className="text-xl font-medium text-purple-700 mb-4">
-                      でも、もし別のアプローチがあるとしたら？
-                    </p>
-                    <p className="text-gray-700 leading-relaxed text-base">
-                      頭で理解するだけでも、感情を癒すだけでもない。<br/>
-                      もっと根本的で、もっと自然な方法が...
-                    </p>
-                  </div>
-                  
-                  <p className="text-center text-orange-700 font-medium text-xl">
-                    それは、演技をやめて、ありのままでいられる人生。<br/>
-                    評価を恐れず、自分を信頼できる毎日。
-                  </p>
-                  
-                  <p className="text-center text-gray-600 italic text-base">
-                    その方法について、これから5日間で<br/>
-                    少しずつお伝えしていきます。
-                  </p>
                 </div>
               </div>
-              
-              <p className="text-lg text-gray-700 leading-relaxed">
-                実際に、この道を歩まれた方々の変化を、少しご紹介させてください。
-              </p>
             </div>
           </div>
         </div>
 
-        {/* 体験者の深い変容談 */}
-        <div className="py-16 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-12">
-              <span className="text-4xl">👥</span>
-              <h2 className="text-3xl font-light text-gray-800 mb-6 mt-6">
-                同じ道を歩いた方々の声
-              </h2>
-              <p className="text-lg text-gray-600">
-                劇的な変化ではありません。<br/>
-                でも、確実に何かが変わり始めています。
+        {/* 橋渡し（感動的） */}
+        <div className="py-12 px-6 bg-gradient-to-r from-amber-50 to-orange-50">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-amber-200">
+              <h3 className="text-2xl font-bold text-amber-800 mb-4">
+                🌈 希望の証明をお見せします
+              </h3>
+              <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                実際に、この道を歩まれた方々がどのように変化されたのか、<br/>
+                リアルな変容の瞬間をご紹介させてください。<br/>
+                きっと、あなたの心にも<strong className="text-amber-700">確かな希望</strong>が生まれるはずです。
               </p>
+              <div className="inline-block bg-gradient-to-r from-amber-200 to-orange-200 rounded-full px-6 py-2">
+                <span className="text-amber-800 font-semibold">✨ 変容の軌跡をご覧ください ✨</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 改善版体験者の声 */}
+        <div className="py-20 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <Users className="w-16 h-16 mx-auto mb-8 text-blue-500" />
+              <h2 className="text-4xl md:text-5xl font-light text-gray-800 mb-8">
+                奇跡は本当に起きています
+              </h2>
+              <p className="text-xl text-gray-600 leading-relaxed">
+                劇的な変化ではありません。<br/>
+                でも、<strong className="text-blue-700">確実に人生が変わり始めています</strong>
+              </p>
+              
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <span className="text-lg font-semibold text-gray-700">多くの方が変容を実感しています</span>
+              </div>
             </div>
 
             <div className="space-y-6">
               {[
                 {
-                  story: "45歳のカウンセラーです。クライアントの前では自信満々なのに、同業者の前では萎縮していました。5日間のプログラムで「あぁ、だから苦しかったんだ」と腑に落ちました。今は、専門職としてのプライドを保ちながら、自然体でいられるようになりました。",
-                  author: "M.Tさん（カウンセラー・東京）"
+                  story: "「偽物感があったから、今の私がある。ＨＩＲＯさんの言う通り、それが特別な証だったんですね。今は楽しみながら仕事ができて、クライアントとの関係も自然体で深くなりました。」",
+                  author: "Y.Mさん（コンサルタント・福岡）",
+                  highlight: "偽物感が特別な証",
+                  icon: "🌟"
                 },
                 {
-                  story: "押し付けがましくないのが良かったです。『無理にとは言いません』『あなたのペースで』という言葉に、とても安心できました。自分で選択できる感じが心地よかったです。",
-                  author: "K.Sさん（セラピスト・大阪）"
+                  story: "「実践ワークが本当に効果的でした。頭で理解するだけじゃなく、身体で感じられるから変化が続いています。自分を楽しめるようになって、仕事の成果も自然に上がりました。」",
+                  author: "T.Kさん（セラピスト・名古屋）",
+                  highlight: "実践ワークで効果が持続",
+                  icon: "✨"
                 },
                 {
-                  story: "三位一体という考え方が、スッと心に入ってきました。難しい理論ではなく、『あぁ、そういうことなんだ』という自然な理解でした。朝、鏡を見た時の感覚が変わりました。",
-                  author: "Y.Tさん（心理カウンセラー・名古屋）"
+                  story: "「満たされながら成功するって、こういうことなんですね。以前は成果を出すために自分を犠牲にしていましたが、今は自分らしさを大切にしながら、より良い結果が出ています。」",
+                  author: "M.Sさん（カウンセラー・大阪）",
+                  highlight: "満たされながら成功",
+                  icon: "🚀"
                 }
               ].map((testimonial, index) => (
                 <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-purple-200">
-                  <p className="text-gray-700 italic leading-relaxed mb-4 text-base">
-                    "{testimonial.story}"
-                  </p>
-                  <div className="text-right text-gray-500 text-base">
-                    {testimonial.author}
+                  <div className="flex items-start gap-6">
+                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center text-2xl">
+                      {testimonial.icon}
+                    </div>
+                    <div className="flex-1">
+                      <div className="mb-4">
+                        <span className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
+                          {testimonial.highlight}
+                        </span>
+                      </div>
+                      <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic">
+                        "{testimonial.story}"
+                      </blockquote>
+                      <div className="text-right text-gray-600 font-medium">
+                        {testimonial.author}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -564,73 +614,55 @@ const FreeTrialAssessment = () => {
           </div>
         </div>
 
-        {/* 静かな価値提示 */}
+        {/* 改善版5日間プログラム */}
         <div className="py-16 px-6 bg-white">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-light text-gray-800 mb-6">
-                これから5日間で<br/>体験していただくこと
+                ジシン覚醒5Days Video プログラム
               </h2>
-              <p className="text-lg text-gray-600">
-                急がなくて大丈夫です。<br/>
-                あなたのペースで、ゆっくりと。
+              <p className="text-lg text-gray-600 mb-8">
+                これから5日間で体験していただくこと
               </p>
-            </div>
-
-            <div className="space-y-6">
-              {[
-                {
-                  day: 1,
-                  title: "「私だけじゃなかった」という安心",
-                  desc: "なぜ優秀な人ほど偽物感を感じるのか。その理由を知ることで、深い安心感を得られます。",
-                  icon: "🤗"
-                },
-                {
-                  day: 2,
-                  title: "なぜ今まで変われなかったのか",
-                  desc: "頭で理解することと、心と身体で変わることの違い。新しい視点から、あなたの可能性を見つめます。",
-                  icon: "💡"
-                },
-                {
-                  day: 3,
-                  title: "あなたの中の三つの自分",
-                  desc: "魂、精神、肉体。この三つがバラバラだから苦しかった。統合への第一歩を、優しく踏み出します。",
-                  icon: "🧘‍♀️"
-                },
-                {
-                  day: 4,
-                  title: "身体が教えてくれること",
-                  desc: "7分間の簡単なワーク。頭ではなく、身体で感じる小さな変化。それが大きな一歩になります。",
-                  icon: "✨"
-                },
-                {
-                  day: 5,
-                  title: "日常に持ち帰る習慣",
-                  desc: "特別なことは必要ありません。日常の中で、自然に続けられる小さな習慣をお伝えします。",
-                  icon: "🌱"
-                }
-              ].map((day, index) => (
-                <div key={day.day} className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 shadow-lg">
-                  <div className="flex items-start gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl shadow-sm">
-                      {day.icon}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-purple-600 font-medium text-base">Day {day.day}</span>
-                        <h3 className="text-lg font-medium text-gray-800">{day.title}</h3>
-                      </div>
-                      <p className="text-gray-600 leading-relaxed text-base">{day.desc}</p>
-                    </div>
-                  </div>
+              
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-orange-200">
+                  <div className="text-3xl mb-3">🌟</div>
+                  <h3 className="font-bold text-orange-800 mb-2">あなたの「偽物感」が</h3>
+                  <h3 className="font-bold text-orange-800 mb-3">特別な証である理由</h3>
+                  <p className="text-sm text-gray-600">ＨＩＲＯの体験談からひも解く真実</p>
                 </div>
-              ))}
-            </div>
-
-            <div className="text-center mt-8">
-              <p className="text-gray-600 text-base">
-                この体験を、まず感じてみてください
-              </p>
+                
+                <div className="bg-gradient-to-r from-pink-50 to-red-50 rounded-xl p-6 border border-pink-200">
+                  <div className="text-3xl mb-3">💖</div>
+                  <h3 className="font-bold text-pink-800 mb-2">自分を楽しんで</h3>
+                  <h3 className="font-bold text-pink-800 mb-3">人生を上手くいかせる秘密</h3>
+                  <p className="text-sm text-gray-600">楽しさと成功の本当の関係</p>
+                </div>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
+                  <div className="text-3xl mb-3">✨</div>
+                  <h3 className="font-bold text-purple-800 mb-2">実践ワークで効果が</h3>
+                  <h3 className="font-bold text-purple-800 mb-3">持続する本当の仕組み</h3>
+                  <p className="text-sm text-gray-600">三位一体統合の実践方法</p>
+                </div>
+                
+                <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 border border-green-200">
+                  <div className="text-3xl mb-3">🚀</div>
+                  <h3 className="font-bold text-green-800 mb-2">満たされながら成功する</h3>
+                  <h3 className="font-bold text-green-800 mb-3">新しい生き方</h3>
+                  <p className="text-sm text-gray-600">犠牲ではなく調和による成功</p>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-300">
+                <p className="text-xl font-bold text-orange-800 mb-2">
+                  すべてを完全無料で公開します！
+                </p>
+                <p className="text-gray-600">
+                  今だけの特別なご案内です
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -696,10 +728,10 @@ const FreeTrialAssessment = () => {
           </div>
         </div>
 
-        {/* 最終オファー */}
-        <div className="py-16 px-6 bg-white">
+        {/* 最終オファー（シンプル版） */}
+        <div className="py-16 px-6 bg-gradient-to-br from-purple-50 to-blue-50">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-3xl p-8 md:p-12 shadow-lg">
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg">
               
               {/* メインタイトル */}
               <div className="text-center mb-8">
@@ -751,21 +783,9 @@ const FreeTrialAssessment = () => {
         
         {/* フッター */}
         <div className="py-8 px-6 bg-gray-50 text-center">
-          <div className="text-gray-500 text-base space-y-2">
-            <p>
-              <a 
-                href="https://konkanjizai.com/privacy-policy/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:text-gray-700 transition-colors underline"
-              >
-                プライバシーポリシー
-              </a>
-            </p>
-            <p>
-              Copyright(c) 2025 魂感自在 All Rights Reserved.
-            </p>
-          </div>
+          <p className="text-gray-500 text-sm">
+            Copyright(c) 2025 魂感自在 All Rights Reserved.
+          </p>
         </div>
       </div>
     );
