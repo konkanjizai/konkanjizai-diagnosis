@@ -201,7 +201,7 @@ const FreeTrialAssessment = () => {
     }
   };
 
-  // 【フリー版5問】の分析ロジック（感情共感＋解決希望型）
+  // 【フリー版5問】の分析ロジック（絶対変更禁止）
   const analyzePreResult = () => {
     if (Object.keys(responses).length !== 5) return null;
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
@@ -266,7 +266,7 @@ const FreeTrialAssessment = () => {
 
   const testimonials = [
     {
-      story: "「偽物感があったから、今の私がある。ＨＩＲＯさんの言う通り、それが特別な証だったんですね。今は楽しみながら仕事ができて、クライアントとの関係も自然体で深くなりました。収入も以前の1.5倍になりました。」",
+      story: "「偽物感があったから、今の私がある。HIROさんの言う通り、それが特別な証だったんですね。今は楽しみながら仕事ができて、クライアントとの関係も自然体で深くなりました。収入も以前の1.5倍になりました。」",
       author: "Y.Mさん（コンサルタント・福岡）",
       highlight: "偽物感が特別な証",
       result: "収入1.5倍アップ",
@@ -288,14 +288,14 @@ const FreeTrialAssessment = () => {
     }
   ];
 
-  // ✅ バージョン13診断結果表示画面
+  // ====== 以下は【完璧版】からそっくりそのまま移植した結果表示部分 ======
   if (showPreResult && preResult) {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative">
-      
+        
         {/* 進捗バー（固定） */}
         <div className="fixed top-0 left-0 w-full h-2 bg-white/30 backdrop-blur-sm z-50">
           <div 
@@ -565,7 +565,7 @@ const FreeTrialAssessment = () => {
           </div>
         </div>
         
-        {/* 最高レベルのＨＩＲＯストーリー */}
+        {/* 最高レベルのHIROストーリー */}
         <div className="py-20 px-6 bg-gradient-to-br from-slate-900 via-purple-900 to-blue-900 text-white relative overflow-hidden">
           {/* 背景エフェクト */}
           <div className="absolute inset-0 overflow-hidden">
@@ -597,10 +597,10 @@ const FreeTrialAssessment = () => {
                 <div className="border-l-4 border-red-400 pl-8 bg-red-900/20 p-6 rounded-r-2xl">
                   <h3 className="text-2xl font-bold text-red-300 mb-4">🌑 絶望の日々</h3>
                   <p className="text-gray-200">
-                    実は私も、あなたと全く同じ苦しみを味わってきました。大手企業で「間違うこと自体が許されない」環境にいた頃、毎日<strong className="text-red-300">「今日こそバレる日かもしれない」</strong>という恐怖と共に出勤していました。
+                    私は長年、どれだけ成功をおさめても満足できず、心の奥底で<strong className="text-red-300">「こんな自分ではダメだ」</strong><strong className="text-red-300">「いつか化けの皮が剥がれるのでは」</strong>という深い不安に苦しんでいました。
                   </p>
                   <p className="text-gray-200 mt-4">
-                    誰にも相談できない孤独感と、「何かが足りない」という虚無感。電車の中で、ふと<strong className="text-red-300">「このまま消えてしまいたい」</strong>と思う日もありました。
+                    悩みを相談しても、周りには「十分恵まれているじゃない」と言われ、<strong className="text-red-300 text-xl">誰にも理解されない孤独</strong>に苦しんでいました。
                   </p>
                 </div>
 
@@ -873,7 +873,7 @@ const FreeTrialAssessment = () => {
                     あなたの「偽物感」が<br/>特別な証である理由
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    ＨＩＲＯの体験談と最新の心理学研究から明かされる、なぜ優秀な人ほど偽物感を感じるのかの真実
+                    HIROの体験談と最新の心理学研究から明かされる、なぜ優秀な人ほど偽物感を感じるのかの真実
                   </p>
                   <div className="bg-white/80 rounded-xl p-4 border border-orange-200">
                     <p className="text-orange-700 font-bold text-sm">✨ Day1で体験できます</p>
@@ -940,8 +940,8 @@ const FreeTrialAssessment = () => {
                   🎁 これら全てを完全無料で公開します！
                 </h3>
                 <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                  通常であれば個別セッション5回分（50万円相当）の内容を<br/>
-                  <strong className="text-orange-700">今回限り、特別に無料</strong>でお届けします
+                  これら全ての内容を<br/>
+                  <strong className="text-orange-700">完全無料</strong>でお届けします
                 </p>
                 <div className="bg-white/80 rounded-xl p-6 border border-orange-200">
                   <p className="text-red-600 font-bold text-lg">
@@ -1116,7 +1116,7 @@ const FreeTrialAssessment = () => {
     );
   }
 
-  // 診断質問画面（絶対変更禁止・元のナレッジファイルと同一）
+  // ====== 診断入力部分（偽物感の正体診断5問アプリ2025/09/16版から移植） ======
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
       <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full">
