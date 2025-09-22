@@ -14,7 +14,7 @@ const FreeTrialAssessment = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   
-  // Google広告・GTM初期化
+  // Google広告・GTM初期化（元のバージョンを維持）
   useEffect(() => {
     initGoogleAdsTag();
   }, []);
@@ -98,13 +98,13 @@ const FreeTrialAssessment = () => {
       free21: JSON.stringify(responses)
     });
     
-    // ✅ 修正: 診断完了の詳細トラッキング（コンバージョンではない）
+    // 診断完了の詳細トラッキング（コンバージョンではない）
     console.log('🎯 診断完了 - UTAGEへ遷移');
     
     // 1. 診断完了の詳細トラッキング（関心段階の計測）
     trackDiagnosisComplete(preResult?.type || "", totalScore, parseFloat(averageScore));
     
-    // 3. UTAGEへの遷移イベント（関心から検討段階への移行）
+    // 2. UTAGEへの遷移イベント（関心から検討段階への移行）
     trackCustomEvent('utage_transition', {
       diagnosis_type: preResult?.type || "",
       total_score: totalScore,
