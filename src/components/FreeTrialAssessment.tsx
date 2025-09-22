@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Heart, Users, BookOpen, Clock, Star, CheckCircle, ArrowRight } from 'lucide-react';
 import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
-const ProductionDiagnosisApp = () => {
+const CompleteDiagnosisApp = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
@@ -14,7 +14,7 @@ const ProductionDiagnosisApp = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   
-  // Google広告・GTM初期化（本番環境）
+  // ✅ 本番環境: Google広告・GTM初期化
   useEffect(() => {
     initGoogleAdsTag();
   }, []);
@@ -104,7 +104,7 @@ const ProductionDiagnosisApp = () => {
     // 1. 診断完了の詳細トラッキング（関心段階の計測）
     trackDiagnosisComplete(preResult?.type || "", totalScore, parseFloat(averageScore));
     
-    // 2. UTAGEへの遷移イベント（関心から検討段階への移行）
+    // 3. UTAGEへの遷移イベント（関心から検討段階への移行）
     trackCustomEvent('utage_transition', {
       diagnosis_type: preResult?.type || "",
       total_score: totalScore,
@@ -281,14 +281,14 @@ const ProductionDiagnosisApp = () => {
     }
   ];
 
-  // ====== 結果表示部分（完璧版をそのまま使用） ======
+  // ====== 結果表示部分（完成版から完全移植） ======
   if (showPreResult && preResult) {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative">
-        
+      
         {/* 進捗バー（固定） */}
         <div className="fixed top-0 left-0 w-full h-2 bg-white/30 backdrop-blur-sm z-50">
           <div 
@@ -1208,4 +1208,4 @@ const ProductionDiagnosisApp = () => {
   );
 };
 
-export default ProductionDiagnosisApp;
+export default CompleteDiagnosisApp;
