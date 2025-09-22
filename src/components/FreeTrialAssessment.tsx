@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Heart, Users, BookOpen, Clock, Star, CheckCircle, ArrowRight } from 'lucide-react';
-// ✅ 修正: trackConversion を import から削除
 import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
 const FreeTrialAssessment = () => {
@@ -15,13 +14,7 @@ const FreeTrialAssessment = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   
-  useEffect(() => {
-    if (showPreResult) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [currentStep, showPreResult]);
-
-  // Google広告・GTM初期化（新しいバージョン）
+  // Google広告・GTM初期化
   useEffect(() => {
     initGoogleAdsTag();
   }, []);
@@ -597,7 +590,7 @@ const FreeTrialAssessment = () => {
                 <div className="border-l-4 border-red-400 pl-8 bg-red-900/20 p-6 rounded-r-2xl">
                   <h3 className="text-2xl font-bold text-red-300 mb-4">🌑 絶望の日々</h3>
                   <p className="text-gray-200">
-                    私は長年、どれだけ成功をおさめても満足できず、心の奥底で<strong className="text-red-300">「こんな自分ではダメだ」</strong><strong className="text-red-300">「いつか化けの皮が剥がれるのでは」</strong>という深い不安に苦しんでいました。
+                    私は長年、どれだけ成功をおさめても満足できず、心の奥底で<strong className="text-red-300">「こんな自分ではダメだ」</strong><strong className="text-red-300">「いつか化けの皮が剥がれるのでは」</strong>という深い不安に苦しんでいました。何不自由ない生活を送っているはずなのに、なぜかいつも満たされない。
                   </p>
                   <p className="text-gray-200 mt-4">
                     悩みを相談しても、周りには「十分恵まれているじゃない」と言われ、<strong className="text-red-300 text-xl">誰にも理解されない孤独</strong>に苦しんでいました。
