@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Heart, Users, BookOpen, Clock, Star, CheckCircle, ArrowRight } from 'lucide-react';
 import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
-const FreeTrialAssessment = () => {
+const ProductionDiagnosisApp = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
@@ -14,7 +14,7 @@ const FreeTrialAssessment = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   
-  // Google広告・GTM初期化（元のバージョンを維持）
+  // Google広告・GTM初期化（本番環境）
   useEffect(() => {
     initGoogleAdsTag();
   }, []);
@@ -98,7 +98,7 @@ const FreeTrialAssessment = () => {
       free21: JSON.stringify(responses)
     });
     
-    // 診断完了の詳細トラッキング（コンバージョンではない）
+    // ✅ 本番環境: 診断完了の詳細トラッキング（関心段階の計測）
     console.log('🎯 診断完了 - UTAGEへ遷移');
     
     // 1. 診断完了の詳細トラッキング（関心段階の計測）
@@ -114,7 +114,7 @@ const FreeTrialAssessment = () => {
     
     setIsSubmitting(true);
     setTimeout(() => {
-      // UTAGEに移動
+      // ✅ 本番環境: 実際にUTAGEに移動
       window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
       setIsSubmitting(false);
     }, 500);
@@ -281,7 +281,7 @@ const FreeTrialAssessment = () => {
     }
   ];
 
-  // ====== 以下は【完璧版】からそっくりそのまま移植した結果表示部分 ======
+  // ====== 結果表示部分（完璧版をそのまま使用） ======
   if (showPreResult && preResult) {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
@@ -1109,7 +1109,7 @@ const FreeTrialAssessment = () => {
     );
   }
 
-  // ====== 診断入力部分（偽物感の正体診断5問アプリ2025/09/16版から移植） ======
+  // ====== 診断入力部分（元のコードを維持） ======
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
       <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full">
@@ -1208,4 +1208,4 @@ const FreeTrialAssessment = () => {
   );
 };
 
-export default FreeTrialAssessment;
+export default ProductionDiagnosisApp;
