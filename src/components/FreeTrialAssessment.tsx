@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Heart, Users, BookOpen, Clock, Star, CheckCircle, ArrowRight } from 'lucide-react';
 
-const CompleteDiagnosisApp = () => {
+const FreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
@@ -1237,4 +1237,4 @@ const CompleteDiagnosisApp = () => {
   );
 };
 
-export default CompleteDiagnosisApp;
+export default FreeTrialAssessment;
