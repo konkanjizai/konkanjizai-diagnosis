@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Heart, Users, BookOpen, Clock, Star, CheckCircle, ArrowRight } from 'lucide-react';
-import { initGoogleAdsTag, trackCustomEvent, trackDiagnosisComplete } from '../utils/googleTag';
 
 const CompleteDiagnosisApp = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -14,8 +13,31 @@ const CompleteDiagnosisApp = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   
-  // ✅ 本番環境: Google広告・GTM初期化
+  // 🔥 本番版：Google広告・GTM初期化
   useEffect(() => {
+    const initGoogleAdsTag = () => {
+      const adsId = '924434837';
+      if (window.gtag) return;
+
+      const script1 = document.createElement('script');
+      script1.async = true;
+      script1.src = `https://www.googletagmanager.com/gtag/js?id=AW-${adsId}`;
+      document.head.appendChild(script1);
+
+      const script2 = document.createElement('script');
+      script2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-${adsId}');
+      `;
+      document.head.appendChild(script2);
+      
+      window.gtag = function(){
+        window.dataLayer.push(arguments);
+      };
+    };
+    
     initGoogleAdsTag();
   }, []);
 
@@ -98,26 +120,33 @@ const CompleteDiagnosisApp = () => {
       free21: JSON.stringify(responses)
     });
     
-    // ✅ 本番環境: 診断完了の詳細トラッキング（関心段階の計測）
+    // 🔥 本番版：Google広告トラッキング
     console.log('🎯 診断完了 - UTAGEへ遷移');
     
-    // 1. 診断完了の詳細トラッキング（関心段階の計測）
-    trackDiagnosisComplete(preResult?.type || "", totalScore, parseFloat(averageScore));
-    
-    // 3. UTAGEへの遷移イベント（関心から検討段階への移行）
-    trackCustomEvent('utage_transition', {
-      diagnosis_type: preResult?.type || "",
-      total_score: totalScore,
-      average_score: parseFloat(averageScore),
-      transition_to: 'optin_page'
-    });
+    // 診断完了の詳細トラッキング（関心段階の計測）
+    if (window.gtag) {
+      window.gtag('event', 'diagnosis_complete', {
+        diagnosis_type: preResult?.type || "",
+        total_score: totalScore,
+        average_score: parseFloat(averageScore)
+      });
+      
+      // UTAGEへの遷移イベント
+      window.gtag('event', 'utage_transition', {
+        diagnosis_type: preResult?.type || "",
+        total_score: totalScore,
+        average_score: parseFloat(averageScore),
+        transition_to: 'optin_page'
+      });
+    }
     
     setIsSubmitting(true);
+    
+    // 🔥 本番版：実際にUTAGEに遷移
     setTimeout(() => {
-      // ✅ 本番環境: 実際にUTAGEに移動
       window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
       setIsSubmitting(false);
-    }, 500);
+    }, 1500);
   };
 
   const formatTime = (seconds) => {
@@ -194,7 +223,7 @@ const CompleteDiagnosisApp = () => {
     }
   };
 
-  // 【フリー版5問】の分析ロジック（絶対変更禁止）
+  // 【フリー版5問】の分析ロジック（感情共感＋解決希望型）
   const analyzePreResult = () => {
     if (Object.keys(responses).length !== 5) return null;
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
@@ -281,14 +310,14 @@ const CompleteDiagnosisApp = () => {
     }
   ];
 
-  // ====== 結果表示部分（完成版から完全移植） ======
+  // ====== 以下は【完璧版】からそっくりそのまま移植した結果表示部分 ======
   if (showPreResult && preResult) {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative">
-      
+        
         {/* 進捗バー（固定） */}
         <div className="fixed top-0 left-0 w-full h-2 bg-white/30 backdrop-blur-sm z-50">
           <div 
@@ -1109,7 +1138,7 @@ const CompleteDiagnosisApp = () => {
     );
   }
 
-  // ====== 診断入力部分（元のコードを維持） ======
+  // ====== 診断入力部分（偽物感の正体診断5問アプリ2025/09/16版から移植） ======
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
       <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full">
