@@ -107,6 +107,7 @@ const NewFreeTrialAssessment = () => {
     return () => observer.disconnect();
   }, [showPreResult]);
 
+  // 🚀 修正版：スマホ対応のメール登録処理
   const handleEmailRegistration = () => {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = (totalScore / 5).toFixed(1);
@@ -120,8 +121,11 @@ const NewFreeTrialAssessment = () => {
       free21: JSON.stringify(responses)
     });
     
-    // 🔥 本番版：Google広告トラッキング
+    const finalURL = `${UTAGE_FORM_URL}?${params.toString()}`;
+    
+    // デバッグ用：URLをコンソールに出力
     console.log('🎯 診断完了 - UTAGEへ遷移');
+    console.log('遷移先URL:', finalURL);
     
     // 診断完了の詳細トラッキング（関心段階の計測）
     if (window.gtag) {
@@ -142,11 +146,17 @@ const NewFreeTrialAssessment = () => {
     
     setIsSubmitting(true);
     
-    // 🔥 本番版：実際にUTAGEに遷移
-    setTimeout(() => {
-      window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
-      setIsSubmitting(false);
-    }, 1500);
+    // 🔧 修正：即座に同一タブで遷移（モバイル対応）
+    try {
+      // スマホで確実に動作する方法
+      window.location.href = finalURL;
+    } catch (error) {
+      console.error('遷移エラー:', error);
+      // フォールバック：直接リンクをクリックしたような動作
+      const link = document.createElement('a');
+      link.href = finalURL;
+      link.click();
+    }
   };
 
   const formatTime = (seconds) => {
