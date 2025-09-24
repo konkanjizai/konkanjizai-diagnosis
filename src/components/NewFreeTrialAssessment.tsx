@@ -7,8 +7,11 @@ const NewFreeTrialAssessment = () => {
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVisible, setIsVisible] = useState({});
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15分
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [readingTime, setReadingTime] = useState(0);
   
   // 🔥 本番版：Google広告・GTM初期化
   useEffect(() => {
@@ -38,6 +41,30 @@ const NewFreeTrialAssessment = () => {
     initGoogleAdsTag();
   }, []);
 
+  // スクロール進捗とリーディングタイム
+  useEffect(() => {
+    if (!showPreResult) return;
+    
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      setScrollProgress(Math.min(progress, 100));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showPreResult]);
+
+  // リーディングタイム計測
+  useEffect(() => {
+    if (!showPreResult) return;
+    
+    const timer = setInterval(() => {
+      setReadingTime(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showPreResult]);
+
   // 限定タイマー
   useEffect(() => {
     if (!showPreResult) return;
@@ -56,6 +83,28 @@ const NewFreeTrialAssessment = () => {
       setCurrentTestimonial(prev => (prev + 1) % 3);
     }, 4000);
     return () => clearInterval(timer);
+  }, [showPreResult]);
+
+  // アニメーション制御
+  useEffect(() => {
+    if (!showPreResult) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            setIsVisible(prev => ({ ...prev, [id]: true }));
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    const sections = document.querySelectorAll('[data-animate="true"]');
+    sections.forEach(section => observer.observe(section));
+
+    return () => observer.disconnect();
   }, [showPreResult]);
 
   const handleEmailRegistration = () => {
@@ -261,7 +310,7 @@ const NewFreeTrialAssessment = () => {
     }
   ];
 
-  // ====== 以下は【完璧版】からそっくりそのまま移植した結果表示部分（スムーズスクロール版） ======
+  // ====== 以下は【完璧版】からそっくりそのまま移植した結果表示部分 ======
   if (showPreResult && preResult) {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
@@ -269,10 +318,23 @@ const NewFreeTrialAssessment = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative">
         
-        {/* 限定オファータイマー（固定） */}
-        <div className="fixed top-4 right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold z-40 shadow-lg animate-pulse">
+        {/* 進捗バー（固定） */}
+        <div className="fixed top-0 left-0 w-full h-2 bg-white/30 backdrop-blur-sm z-50">
+          <div 
+            className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 transition-all duration-300"
+            style={{ width: `${scrollProgress}%` }}
+          ></div>
+        </div>
+
+        {/* 限定オファータイマー（固定） - 赤色に修正 */}
+        <div className="fixed top-2 right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold z-40 shadow-lg animate-pulse">
           <Clock className="w-4 h-4 inline mr-2" />
           限定公開: {formatTime(timeLeft)}
+        </div>
+
+        {/* リーディングタイム表示 */}
+        <div className="fixed top-2 left-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-600 z-40">
+          📖 {Math.floor(readingTime / 60)}分{readingTime % 60}秒
         </div>
         
         {/* 診断結果表示（感動的演出） */}
@@ -390,7 +452,11 @@ const NewFreeTrialAssessment = () => {
         </div>
 
         {/* インポスター症候群の権威的説明 */}
-        <div className="py-20 px-6 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div 
+          id="understanding-section"
+          data-animate="true"
+          className="py-20 px-6 bg-gradient-to-br from-slate-50 to-blue-50"
+        >
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-8 shadow-xl">
@@ -404,7 +470,9 @@ const NewFreeTrialAssessment = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-3xl p-10 md:p-16 shadow-2xl mb-12">
+            <div className={`bg-white rounded-3xl p-10 md:p-16 shadow-2xl mb-12 transform transition-all duration-1000 ${
+              isVisible['understanding-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+            }`}>
               
               <div className="text-center mb-12">
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 mb-8 border border-blue-100">
@@ -649,8 +717,12 @@ const NewFreeTrialAssessment = () => {
           </div>
         </div>
 
-        {/* 最強の体験者の声（動的表示） */}
-        <div className="py-20 px-6 bg-gradient-to-br from-blue-50 to-purple-50">
+        {/* 🔧 修正された体験者の声（縦揺れ解決版） */}
+        <div 
+          id="testimonials-section"
+          data-animate="true"
+          className="py-20 px-6 bg-gradient-to-br from-blue-50 to-purple-50"
+        >
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <Users className="w-16 h-16 mx-auto mb-8 text-blue-500" />
@@ -669,80 +741,42 @@ const NewFreeTrialAssessment = () => {
               </div>
             </div>
 
-            {/* メイン体験談（アニメーション付き） */}
+            {/* メイン体験談（縦揺れ解決版） */}
             <div className="bg-white rounded-3xl p-10 shadow-2xl mb-12 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-pink-500"></div>
               
-              <div className={`transition-all duration-500 ${currentTestimonial === 0 ? 'opacity-100' : 'opacity-0 absolute inset-0 p-10'}`}>
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center text-2xl">
-                    {testimonials[0].icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="mb-4">
-                      <span className="inline-block bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
-                        {testimonials[0].highlight}
-                      </span>
-                      <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-                        <span className="text-yellow-700 font-bold">🎯 結果: {testimonials[0].result}</span>
+              {/* 固定高さコンテナで縦揺れを防止 */}
+              <div className="relative min-h-[300px]">
+                {testimonials.map((testimonial, index) => (
+                  <div 
+                    key={index}
+                    className={`transition-opacity duration-500 ${
+                      currentTestimonial === index ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                    }`}
+                  >
+                    <div className="flex items-start gap-6">
+                      <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center text-2xl">
+                        {testimonial.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="mb-4">
+                          <span className="inline-block bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
+                            {testimonial.highlight}
+                          </span>
+                          <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                            <span className="text-yellow-700 font-bold">🎯 結果: {testimonial.result}</span>
+                          </div>
+                        </div>
+                        <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic border-l-4 border-yellow-300 pl-4">
+                          "{testimonial.story}"
+                        </blockquote>
+                        <div className="text-right text-gray-600 font-medium">
+                          {testimonial.author}
+                        </div>
                       </div>
                     </div>
-                    <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic border-l-4 border-yellow-300 pl-4">
-                      "{testimonials[0].story}"
-                    </blockquote>
-                    <div className="text-right text-gray-600 font-medium">
-                      {testimonials[0].author}
-                    </div>
                   </div>
-                </div>
-              </div>
-
-              <div className={`transition-all duration-500 ${currentTestimonial === 1 ? 'opacity-100' : 'opacity-0 absolute inset-0 p-10'}`}>
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center text-2xl">
-                    {testimonials[1].icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="mb-4">
-                      <span className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
-                        {testimonials[1].highlight}
-                      </span>
-                      <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                        <span className="text-purple-700 font-bold">🎯 結果: {testimonials[1].result}</span>
-                      </div>
-                    </div>
-                    <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic border-l-4 border-purple-300 pl-4">
-                      "{testimonials[1].story}"
-                    </blockquote>
-                    <div className="text-right text-gray-600 font-medium">
-                      {testimonials[1].author}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`transition-all duration-500 ${currentTestimonial === 2 ? 'opacity-100' : 'opacity-0 absolute inset-0 p-10'}`}>
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-100 to-teal-100 rounded-full flex items-center justify-center text-2xl">
-                    {testimonials[2].icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="mb-4">
-                      <span className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold mb-3">
-                        {testimonials[2].highlight}
-                      </span>
-                      <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                        <span className="text-green-700 font-bold">🎯 結果: {testimonials[2].result}</span>
-                      </div>
-                    </div>
-                    <blockquote className="text-gray-700 text-lg leading-relaxed mb-4 italic border-l-4 border-green-300 pl-4">
-                      "{testimonials[2].story}"
-                    </blockquote>
-                    <div className="text-right text-gray-600 font-medium">
-                      {testimonials[2].author}
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* インジケーター */}
@@ -781,7 +815,11 @@ const NewFreeTrialAssessment = () => {
         </div>
 
         {/* 究極のプログラム紹介 */}
-        <div className="py-20 px-6 bg-white relative overflow-hidden">
+        <div 
+          id="program-section"
+          data-animate="true"
+          className="py-20 px-6 bg-white relative overflow-hidden"
+        >
           {/* 背景装飾 */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-100/50 to-pink-100/50 rounded-full blur-3xl"></div>
@@ -810,7 +848,9 @@ const NewFreeTrialAssessment = () => {
             {/* 4つの核心価値 */}
             <div className="grid md:grid-cols-2 gap-8 mb-16">
               
-              <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl p-8 border-2 border-orange-200 shadow-lg transform hover:scale-105 transition-all duration-300">
+              <div className={`bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl p-8 border-2 border-orange-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`}>
                 <div className="text-center">
                   <div className="text-5xl mb-4">🌟</div>
                   <h3 className="text-2xl font-bold text-orange-800 mb-4">
@@ -825,7 +865,9 @@ const NewFreeTrialAssessment = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-pink-50 to-red-50 rounded-3xl p-8 border-2 border-pink-200 shadow-lg transform hover:scale-105 transition-all duration-300">
+              <div className={`bg-gradient-to-br from-pink-50 to-red-50 rounded-3xl p-8 border-2 border-pink-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`} style={{ transitionDelay: '200ms' }}>
                 <div className="text-center">
                   <div className="text-5xl mb-4">💖</div>
                   <h3 className="text-2xl font-bold text-pink-800 mb-4">
@@ -840,7 +882,9 @@ const NewFreeTrialAssessment = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 shadow-lg transform hover:scale-105 transition-all duration-300">
+              <div className={`bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`} style={{ transitionDelay: '400ms' }}>
                 <div className="text-center">
                   <div className="text-5xl mb-4">✨</div>
                   <h3 className="text-2xl font-bold text-purple-800 mb-4">
@@ -855,7 +899,9 @@ const NewFreeTrialAssessment = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-3xl p-8 border-2 border-green-200 shadow-lg transform hover:scale-105 transition-all duration-300">
+              <div className={`bg-gradient-to-br from-green-50 to-teal-50 rounded-3xl p-8 border-2 border-green-200 shadow-lg transform transition-all duration-1000 hover:scale-105 ${
+                isVisible['program-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+              }`} style={{ transitionDelay: '600ms' }}>
                 <div className="text-center">
                   <div className="text-5xl mb-4">🚀</div>
                   <h3 className="text-2xl font-bold text-green-800 mb-4">
@@ -895,7 +941,11 @@ const NewFreeTrialAssessment = () => {
         </div>
 
         {/* 最終メッセージ（感動のクライマックス） */}
-        <div className="py-20 px-6 bg-gradient-to-br from-slate-900 via-purple-900 to-blue-900 text-white relative overflow-hidden">
+        <div 
+          id="final-message-section"
+          data-animate="true"
+          className="py-20 px-6 bg-gradient-to-br from-slate-900 via-purple-900 to-blue-900 text-white relative overflow-hidden"
+        >
           {/* 背景エフェクト */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-10 right-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -903,7 +953,9 @@ const NewFreeTrialAssessment = () => {
           </div>
 
           <div className="max-w-4xl mx-auto relative">
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 md:p-16 shadow-2xl border border-white/20">
+            <div className={`bg-white/10 backdrop-blur-xl rounded-3xl p-12 md:p-16 shadow-2xl border border-white/20 transform transition-all duration-1000 ${
+              isVisible['final-message-section'] ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+            }`}>
               
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-5xl font-light mb-8 leading-tight">
