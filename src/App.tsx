@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import FreeTrialAssessment from './components/FreeTrialAssessment'
+import FreeTrialAssessment from './components/NewFreeTrialAssessment'
 import DetailedAssessment from './components/DetailedAssessment'
 import { initGoogleAdsTag } from './utils/googleTag'
 

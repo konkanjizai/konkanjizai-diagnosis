@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Heart, Users, BookOpen, Clock, Star, CheckCircle, ArrowRight } from 'lucide-react';
 
-const FreeTrialAssessment = () => {
+const NewFreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
   const [showPreResult, setShowPreResult] = useState(false);
@@ -326,7 +326,7 @@ const FreeTrialAssessment = () => {
           ></div>
         </div>
 
-        {/* 限定オファータイマー（固定） */}
+        {/* 限定オファータイマー（固定） - 赤色に修正 */}
         <div className="fixed top-2 right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold z-40 shadow-lg animate-pulse">
           <Clock className="w-4 h-4 inline mr-2" />
           限定公開: {formatTime(timeLeft)}
@@ -1138,13 +1138,13 @@ const FreeTrialAssessment = () => {
     );
   }
 
-  // ====== 診断入力部分（偽物感の正体診断5問アプリ2025/09/16版から移植） ======
+  // ====== 診断入力部分（DARK系を維持） ======
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
       <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full">
         
         <div className="text-center mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-1 sm:mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-yellow-400 mb-1 sm:mb-2">
             偽物感の正体診断
           </h1>
           <p className="text-white/80 text-sm sm:text-base">3分でわかる深層心理分析</p>
@@ -1237,4 +1237,4 @@ const FreeTrialAssessment = () => {
   );
 };
 
-export default FreeTrialAssessment;// Force deploy
+export default NewFreeTrialAssessment;
