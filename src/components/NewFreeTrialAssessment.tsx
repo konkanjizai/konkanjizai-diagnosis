@@ -115,6 +115,7 @@ const NewFreeTrialAssessment = () => {
     return () => observer.disconnect();
   }, [showPreResult]);
 
+  // ✅ iOS対応版：即座に同じタブで遷移
   const handleEmailRegistration = () => {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = (totalScore / 5).toFixed(1);
@@ -150,11 +151,8 @@ const NewFreeTrialAssessment = () => {
     
     setIsSubmitting(true);
     
-    // 🔥 本番版：実際にUTAGEに遷移
-    setTimeout(() => {
-      window.open(`${UTAGE_FORM_URL}?${params.toString()}`, '_blank');
-      setIsSubmitting(false);
-    }, 1500);
+    // ✅ iOS対応：即座に同じタブで遷移（ポップアップブロッカー回避）
+    window.location.href = `${UTAGE_FORM_URL}?${params.toString()}`;
   };
 
   const formatTime = (seconds) => {
@@ -1056,12 +1054,12 @@ const NewFreeTrialAssessment = () => {
                 </div>
               </div>
               
-              {/* CTA ボタン（完全レスポンシブ対応） */}
+              {/* CTA ボタン（iOS対応・完全レスポンシブ対応） */}
               <div className="text-center">
                 <button
                   onClick={handleEmailRegistration}
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg md:text-xl font-bold text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg md:text-xl font-bold text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     background: 'linear-gradient(135deg, #f97316 0%, #ec4899 100%)'
                   }}
