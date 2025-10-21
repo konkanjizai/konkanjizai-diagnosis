@@ -1,14 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Heart, Users, BookOpen, Clock, Star, CheckCircle, ArrowRight } from 'lucide-react';
-import { 
-  trackDiagnosisStart, 
-  trackQuestionAnswer, 
-  trackDiagnosisComplete, 
-  trackResultView, 
-  trackCTAClick, 
-  trackOptinTransition 
-} from '../utils/analytics';
 
 const NewFreeTrialAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -128,10 +120,6 @@ const NewFreeTrialAssessment = () => {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = (totalScore / 5).toFixed(1);
     
-    // GA4計測: CTAクリックとUTAGE遷移
-    trackCTAClick(preResult?.type || '');
-    trackOptinTransition(preResult?.type || '', parseFloat(averageScore));
-    
     const UTAGE_FORM_URL = "https://online.konkanjizai.com/p/shindan";
     
     const params = new URLSearchParams({
@@ -225,14 +213,6 @@ const NewFreeTrialAssessment = () => {
       ...prev,
       [questionId]: value
     }));
-    
-    // GA4計測: 診断開始（1問目のみ）
-    if (currentStep === 0 && Object.keys(responses).length === 0) {
-      trackDiagnosisStart();
-    }
-    
-    // GA4計測: 各質問の回答
-    trackQuestionAnswer(questionId, value);
   };
 
   const handleNext = () => {
@@ -340,14 +320,6 @@ const NewFreeTrialAssessment = () => {
   if (showPreResult && preResult) {
     const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
     const averageScore = totalScore / 5;
-    
-    // GA4計測: 診断完了と結果表示（初回のみ）
-    useEffect(() => {
-      if (preResult) {
-        trackDiagnosisComplete(totalScore, averageScore);
-        trackResultView(preResult.type, averageScore);
-      }
-    }, []);
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative overflow-x-hidden">
@@ -792,10 +764,6 @@ const NewFreeTrialAssessment = () => {
                       <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center text-xl sm:text-2xl mx-auto sm:mx-0">
                         {testimonial.icon}
                       </div>
-                     <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 md:gap-6">
-                      <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center text-xl sm:text-2xl mx-auto sm:mx-0">
-                        {testimonial.icon}
-                      </div>
                       <div className="flex-1 w-full">
                         <div className="mb-3 sm:mb-4">
                           <span className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold mb-2 sm:mb-3">
@@ -1237,5 +1205,3 @@ const NewFreeTrialAssessment = () => {
 };
 
 export default NewFreeTrialAssessment;
-
-
